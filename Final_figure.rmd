@@ -57,6 +57,7 @@ Run alignment and variant calling using the SCRAMseq pipeline (described in Meth
 {domain}_BC_mut_assignment_with_effect.rds — cell barcode to variant assignment with functional classification
 mutations_{experiment}_to_conversion.txt — per-cell SCRAMseq scores (Sign_test_11) with variant assignment
 
+The other files are available as supplemetary tables
 
 Figure 2E top - CD molecules expression
 ```{r}
