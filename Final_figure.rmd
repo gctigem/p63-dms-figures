@@ -3,7 +3,6 @@ title: "Final figures paper: Genotype-phenotype single-cell transcriptomics for 
 output: html_document
 date: "2026-05-04"
 author: "Rosa De Santis"
-
 ---
 
 #library needed to run the code
@@ -58,15 +57,13 @@ Run alignment and variant calling using the SCRAMseq pipeline (described in Meth
 {domain}_BC_mut_assignment_with_effect.rds — cell barcode to variant assignment with functional classification
 mutations_{experiment}_to_conversion.txt — per-cell SCRAMseq scores (Sign_test_11) with variant assignment
 
-In silico predictor scores (MutPred2, PROVEAN, SIFT, PolyPhen2, AlphaMissense, CADD, ESM-1b, EVE) are provided in Supplementary Table 
-Clinical
 
-#Figure 2E top - CD molecules expression
+Figure 2E top - CD molecules expression
 ```{r}
 fig="1E_top"
 
-res=read.table("Paper_FP/Results/WTvsGFP_results_annotated.txt",sep="\t",header=T)
-cd_ann=read.table("Paper_FP/Data/CD_proteins_annotation.txt",header=T,quote="",sep="\t")
+res=read.table("Results/WTvsGFP_results_annotated.txt",sep="\t",header=T)
+cd_ann=read.table("Data/CD_proteins_annotation.txt",header=T,quote="",sep="\t")
 res$CD=ifelse(res$external_gene_name%in%cd_ann$Approved.symbol,T,F)
 
 res=res[order(res$logFC_WTvsGFP,decreasing=T),]
@@ -78,7 +75,7 @@ plot$external_gene_name=factor(plot$external_gene_name,levels=res_sub$external_g
 
 colors=c("blue4","red4")
 
-pdf(paste0("Paper_FP/Figure1/",fig,".pdf"),width=6,height=6)
+pdf(paste0("Figure1/",fig,".pdf"),width=6,height=6)
 ggplot(plot, aes(x=external_gene_name, y=value, fill=variable))+
     geom_bar(color="black", position = position_dodge(),stat = "identity",width = .5)+
   theme_classic()+
@@ -89,12 +86,12 @@ ggplot(plot, aes(x=external_gene_name, y=value, fill=variable))+
 dev.off()
 ```
 
-#Fig. 2F FACS
+Fig. 2F FACS
 ```{r}
 
 fig="1E_btm"
 
-data.path = "Paper_FP/Data/FACS_wt_gfp/"
+data.path = "Data/FACS_wt_gfp"
 fs <- read.flowSet(path = data.path, transformation = "linearize",  
                    emptyValue = FALSE,  alter.names = TRUE,  
                    column.pattern = ".H|FSC|SSC") 
@@ -114,7 +111,7 @@ threshold=quantile(final_sub[final_sub$sample=="WT","PE.H"],.25)
 
 colors=c(alpha("blue4",.3),alpha("red4",.3))
   
-pdf(paste0("Paper_FP/Figure1/",fig,".pdf"),width=16,height=6)
+pdf(paste0("Figure1/",fig,".pdf"),width=16,height=6)
   ggplot(final_sub, aes_string(x="PE.H", fill="sample",color="sample"))+geom_histogram(bins = 300,alpha=.3)+
     scale_x_continuous(trans = "log10")+
     theme_classic()+theme(axis.title = element_blank())+
@@ -128,9 +125,9 @@ pdf(paste0("Paper_FP/Figure1/",fig,".pdf"),width=16,height=6)
 
 
 
-#Fig. 2D Volcano Plot and S1A GO enrichment
+Fig. 2D Volcano Plot and S1A GO enrichment
 ```{r}
-if(!file.exists("Paper_FP/Results/WTvsGFP_results_annotated.txt")){
+if(!file.exists("Results/WTvsGFP_results_annotated.txt")){
 mtx=read.table("Paper_FP/Data/P63_Mutants_validation_final_merged_rawCountsWithAnnotations.txt",header=T,sep="\t",quote="",stringsAsFactors = F)
 
 pjsamples=data.frame(unique_samples=colnames(mtx)[-c(1:2)], condition=ifelse(stringr::str_count(colnames(mtx)[-c(1:2)],"_")>1,sapply(strsplit(colnames(mtx)[-c(1,2)],"_"),"[[", 2),sapply(strsplit(colnames(mtx)[-c(1,2)],"_"),"[[", 1)))
@@ -170,7 +167,7 @@ volc=volc[order(volc[,2],decreasing=T),]
 volc[1:10,4]="UP-Top"
 volc[(nrow(volc)-10):nrow(volc),4]="DOWN-Top"
 
-pdf(paste0("Paper_FP/Figure1/",fig,".pdf"),height=6, width=8)
+pdf(paste0("Figure1/",fig,".pdf"),height=6, width=8)
   ggplot(volc, aes(x = volc[,2], y = -log10(volc[,3]), color = volc[,4], size=volc[,4]))+  
   geom_point(na.rm = T) +
   theme_bw() +
@@ -258,14 +255,14 @@ plot=ggplot(data, aes(x = -log10(p.adj), y = Path, fill=overlap, label=Path)) +
   geom_text()+
   geom_vline(xintercept = -log10(0.05),linetype="dashed",color="black")
 
- pdf(paste0("Paper_FP/Figure1/",fig, "_GO.pdf"), height=12, width=6)
+ pdf(paste0("Figure1/",fig, "_GO.pdf"), height=12, width=6)
   print(plot)
   dev.off()
 
 ```
 
 
-#Figure S3A heatmap SAM/DBD and Figure S3B scatter correlation 
+Figure S3A heatmap SAM/DBD and Figure S3B scatter correlation 
 ```{r}
 fig="S2A"
 domain="SAM"
@@ -286,7 +283,7 @@ rownames(sub)=paste0(sub$aa_or,sub$order,sub$aa)
 input=read.table(paste0("Predictors_benchmark_RDS/Mutpred_prediction",domain,".txt"), row.names = 1,header=T)
 input=pred[,-c(7,8)]
 
-sort=read.table("Paper_FP/Results/order_aa_heatmaps.txt",header=T)
+sort=read.table("Results/order_aa_heatmaps.txt",header=T)
 sort=as.character(sort$aa)
 
 p1=list()
@@ -493,7 +490,7 @@ library(scales)
 }
 
 
-pdf(paste0("nuove_immagini_RDS/",fig,"_",domain,"samescales_test.pdf"), height =4,width = 16)
+pdf(paste0("figures/",fig,"_",domain,"samescales_test.pdf"), height =4,width = 16)
 for(i in 1:length(p2)){
   if (i==2){
         print(grid.arrange(p1[[i]],nullGrob(),p2[[i]] , nrow=1, ncol=3, widths=c(2,0.05,1)))
@@ -503,14 +500,15 @@ for(i in 1:length(p2)){
 }
 dev.off()
 
-pdf(paste0("nuove_immagini_RDS/",fig,"_",domain,"corr.pdf"), height =4,width =5 )
+pdf(paste0("figures/",fig,"_",domain,"corr.pdf"), height =4,width =5 )
 for(i in 1:length(p2)){
     print(p2[[i]])
 }
 dev.off()
 ```
 
-#Fig. S3C Spearman correlation MITE vs all predictors
+
+Fig. S3C Spearman correlation MITE vs all predictors
 ```{r}
 domain="SAM" #or DBD
 pred=read.table(paste0("Predictors_benchmark_RDS/",domain,"_all_predictors.txt"), header = T, sep="\t") 
@@ -527,7 +525,7 @@ pred_joined$mut_name=NULL
 corr_matrix <- cor(pred_joined,method = "spearman", use = "pairwise.complete.obs")
 corr_matrix=corr_matrix[-5,-5]
 
-# Create heatmap
+
 pheatmap(corr_matrix,
          color = colorRampPalette(c("blue", "white", "red"))(50), 
          display_numbers = TRUE,      
@@ -581,7 +579,7 @@ Fig. 3B heatmap mean score predictor
 fig="A5"
 domain="DBD"
 
-input=read.table(paste0("Paper_FP/Data/",domain,"/Mutpred_prediction",domain,".txt"), row.names = 1,header=T)
+input=read.table(paste0("Data/",domain,"/Mutpred_prediction",domain,".txt"), row.names = 1,header=T)
 
 p=list()
 for(i in 1:6){
@@ -640,7 +638,7 @@ dev.off()
 fig="A5"
 domain="SAM"
 
-input=read.table(paste0("Paper_FP/Data/",domain,"/Mutpred_prediction",domain,".txt"), row.names = 1,header=T)
+input=read.table(paste0("Data/",domain,"/Mutpred_prediction",domain,".txt"), row.names = 1,header=T)
 p=list()
 for(i in 1:6){
 mut_pred=input[,i,drop=F]
@@ -654,7 +652,6 @@ mut_pred$aa=factor(mut_pred$aa, levels = rev(sort))
 
 
 z <- as.data.frame(complete(mut_pred, residues, aa))
-
 plot=data.frame(residues=unique(z$residues), mean_score=sapply(unique(z$residues), function(x) mean(z[z$residues==x,"score"], na.rm=T)))
 
 if(i==1){
@@ -734,7 +731,7 @@ p <- ggplot(plot, aes(residues, "CADD")) + theme_void() +
     legend.text = element_text(size = 15, family = "Courier")
   )
 
-pdf(paste0("nuove_immagini_RDS/3B","_",domain,".pdf"), height =4,width = 16)
+pdf(paste0("figures/3B","_",domain,".pdf"), height =4,width = 16)
 p
 dev.off()
 
@@ -792,7 +789,7 @@ p <- ggplot(plot, aes(residues, "EVE")) + theme_void() +
   )
 
 
-pdf(paste0("nuove_immagini_RDS/3B_EVE","_",domain,".pdf"), height =4,width = 16)
+pdf(paste0("figures/3B_EVE","_",domain,".pdf"), height =4,width = 16)
 p
 dev.off()
 ```
@@ -809,7 +806,6 @@ sub$residues=substr(rownames(sub), 1, 4)
 sub$aa=substr(rownames(sub), 5, 5)
 sub$order=substr(sub$residues, 2,4)
 sub=sub[order(sub$order, decreasing=T),]
-
 sub$residues=factor(sub$residues, levels = rev(unique(sub$residues)))
 sub_dbd=sub[,c("aa","logFC")]
 
@@ -829,10 +825,10 @@ sort=sort(sapply(unique(final$aa), function(x) sum(final[final$aa==x, "logFC"],n
 
 sort=data.frame(aa=names(sort),values=sort)
 sort$aa=factor(sort$aa,levels=(sort$aa))
-write.table(sort, "../Data/order_aa_heatmaps.txt",row.names = F,sep="\t",quote=F)
+write.table(sort, "Data/order_aa_heatmaps.txt",row.names = F,sep="\t",quote=F)
 
 
-pdf(paste0("../nuove_immagini_RDS/","cumulative_score",".pdf"), height =6,width = 4)
+pdf(paste0("figures/","cumulative_score",".pdf"), height =6,width = 4)
 ggplot(sort, aes(values, aa,group=1)) + theme_bw()+
   geom_point(size=3, color = "white") +
   geom_line()+
@@ -848,12 +844,11 @@ dev.off()
 ```
 
 Fig. 3C and Fig. 3D Polarity and Conservation
-
 ```{r}
 fig="A2"
 domain="DBD" #or SAM
 
-clust=read.table(paste0("Paper_FP/Data/Consurf_polarity_",domain,".txt"),header=T)
+clust=read.table(paste0("Data/Consurf_polarity_",domain,".txt"),header=T)
 
 pdf(paste0("Figure2/",fig,"_",domain,".pdf"), height =4,width = 16)
 ggplot(clust, aes(pos, "Cond")) + theme_void()+
@@ -879,7 +874,6 @@ Fig. 3A Mite enrichment score
 domain="DBD" #or SAM
 edger_scores=read.table(paste0("Data/",domain,"_mut_list_muscan_single_rep.txt"),sep="\t")
 
-
 #preparing data for heatmap
 sub=edger_scores
 sub=sub[rownames(sub)!="WT",]
@@ -889,15 +883,13 @@ sub$order=substr(sub$residues, 2,4)
 sub=sub[order(sub$order, decreasing=T),]
 
 sub$residues=factor(sub$residues, levels = rev(unique(sub$residues)))
-
-sort=read.table("Paper_FP/Results/order_aa_heatmaps.txt",header=T)
-
+sort=read.table("Results/order_aa_heatmaps.txt",header=T)
 sort=as.character(sort$aa)
 sub$aa=factor(sub$aa, levels = rev(sort))
 
 
 #we plot in blue the variants enriched in the converted and in red the variant enriched in not converted
-pdf(paste0("nuove_immagini_RDS/","Fig2A","_",domain,".pdf"), height =4,width = 16)
+pdf(paste0("figures/","Fig2A","_",domain,".pdf"), height =4,width = 16)
 ggplot(sub, aes(aa, residues)) + theme_void()+
   geom_tile(aes(fill = logFC),size=1, color = "white") +
   scale_fill_gradientn(colors=colorRampPalette(c("darkblue", 'darkblue', 'white', "red", "red2"))(100),limits = c(-6, 6.80), na.value = "grey50") +
@@ -915,9 +907,8 @@ ggplot(sub, aes(aa, residues)) + theme_void()+
 dev.off()
 ```
 
-#Fig. 4A
+Fig. 4A score ranking
 ```{r}
-# Score ranking
 domain="SAM" #DBD
 clust=read.table(paste0("Data/",domain,"_mut_list_muscan_single_rep.txt"),header = T)
 
@@ -928,7 +919,6 @@ sub$aa_change=substr(rownames(sub), 5, 5)
 sub$order=as.numeric(substr(sub$residues, 2,4))+43
 sub$aa_base=substr(sub$residues, 1,1)
 rownames(sub)=paste0(sub$aa_base,sub$order,sub$aa_change)
-
 clust_sam=sub
 
 domain="DBD" #SAM
@@ -956,7 +946,7 @@ final$mut=factor(final$mut, levels=final$mut)
 final$logFC_z <- (final$logFC - mean(final$logFC, na.rm = TRUE)) / sd(final$logFC, na.rm = TRUE)
 
 
-pdf(paste0("nuove_immagini_RDS/Score_ranking.pdf"), height =8,width =4 , useDingbats = F)
+pdf(paste0("figures/Score_ranking.pdf"), height =8,width =4 , useDingbats = F)
 ggplot(final, aes(mut, logFC_z, fill=color,size=size,label=label)) + 
   geom_hline(yintercept = 0, linetype="dotted", color="grey20")+
   geom_point(pch=21, color="black") + theme_bw()+theme(axis.title = element_blank(), axis.ticks.x=element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), axis.text.y = element_text(size=15, angle=90, hjust=0.5,family="Courier"), axis.text.x = element_blank(),legend.position = "none") +  scale_fill_manual(values=c("black","red2","darkorchid","orange2","blue2","green2")) + coord_cartesian(ylim=c(-4.25,4.25)) + scale_size_manual(values = c(0.5,3)) + geom_text(hjust=-0.5, vjust=0.5, size=3)
@@ -973,9 +963,8 @@ data=read.table("Paper_FP/Data/IF_quant.txt")
 data$exp="IF"
 
 #FACS
-data_facs=readRDS("Paper_FP/Data/mutants_FACS_data.rds")
-data_facs_wt=readRDS("Paper_FP/Data/wt_FACS_data.rds")
-
+data_facs=readRDS("Data/mutants_FACS_data.rds")
+data_facs_wt=readRDS("Data/wt_FACS_data.rds")
 data_facs=rbind(data_facs, data_facs_wt)
 
 threshold=quantile(data_facs[data_facs$sample=="WT","PE.H"],.25)
@@ -984,17 +973,17 @@ data_fin$V1=gsub("r304t","R304T",data_fin$V1)
 data_fin$V2=ifelse(data_fin$V2>100,100,data_fin$V2)
 
 #RNA
-d=readRDS("Paper_FP/Data/RNAseq_correlation.rds")
+d=readRDS("Data/RNAseq_correlation.rds")
 plot=rbind(data, data_fin,d)
 plot$V1=factor(plot$V1,levels=levels)
 
 #NATIVE
 
-nat=read.table("Paper_FP/Data/Native_quant.txt")
+nat=read.table("Data/Native_quant.txt")
 nat$V1=factor(nat$V1,levels=levels)
 nat$V2=ifelse(nat$V2>4, 4, nat$V2)
 
-pdf(paste0("Paper_FP/Figure3/",fig,".pdf"), height =4,width = 16)
+pdf(paste0("Figure3/",fig,".pdf"), height =4,width = 16)
 ggplot(plot[plot$exp!="RNA",], aes(V1, exp)) + theme_classic()+ theme(axis.title = element_blank(), axis.ticks = element_blank(), axis.text.x = element_text(angle=90,hjust=1, vjust=.5))+
   geom_tile(aes(fill = V2),size=1, color = "white") +
   scale_fill_distiller(palette = "OrRd", direction = 1)
@@ -1012,7 +1001,7 @@ Fig. 4E heatmap
 fig="3D"
 levels=unlist(strsplit("WT - G293H - G310Q - R304Q - R279Q - R304T - R279S - R311I - G297L - T527I - H556A - L514F - C522G - L514D - C522D - L531E - L531R - L548N - I550D - GFP", " - "))
 
-mtx=read.table("Paper_FP/Data/P63_Mutants_validation_final_merged_rawCountsWithAnnotations.txt",header=T,sep="\t",quote="",stringsAsFactors = F)
+mtx=read.table("Data/P63_Mutants_validation_final_merged_rawCountsWithAnnotations.txt",header=T,sep="\t",quote="",stringsAsFactors = F)
 
 pjsamples=data.frame(unique_samples=colnames(mtx)[-c(1:2)], condition=ifelse(stringr::str_count(colnames(mtx)[-c(1:2)],"_")>1,sapply(strsplit(colnames(mtx)[-c(1,2)],"_"),"[[", 2),sapply(strsplit(colnames(mtx)[-c(1,2)],"_"),"[[", 1)))
 
@@ -1027,8 +1016,8 @@ avg=as.data.frame(sapply(unique(pjsamples_red$condition), function(x) rowMeans(c
 rownames(avg)=make.unique(cpm[,2])
 
 
-# Subset for conversion signature and DOWN
-res=read.table("Paper_FP/Results/WTvsGFP_results_annotated.txt",sep="\t",header=T)
+# Subset for conversion signature
+res=read.table("Results/WTvsGFP_results_annotated.txt",sep="\t",header=T)
 res=res[res$diffEXP_WTvsGFP%in%c("UP","DOWN"),]
 res$external_gene_name=ifelse(is.na(res$external_gene_name), res$ensembl_gene_id, res$external_gene_name)
 sign=data.frame(row.names = res$external_gene_name, cond=res$diffEXP_WTvsGFP)
@@ -1042,7 +1031,7 @@ plot=plot[match(rownames(sign),rownames(plot)),]
 
 breaksList = c(seq(-2, -1, by = 0.01), seq(-0.99, -0.1, by = 0.01), seq(-0.09, 0.09, by=0.01), seq(0.1, 0.99, by=0.01), seq(1, 2, by = 0.01))
 
-pdf(paste0("Paper_FP/Figure3/",fig,"_UP_DOWN.pdf"), width=10,height=6)
+pdf(paste0("Figure3/",fig,"_UP_DOWN.pdf"), width=10,height=6)
 pheatmap(plot, cluster_rows=F, show_rownames=F, border_color = NA, scale = "row", cluster_cols=F, color = colorRampPalette(c("#0571b0", "#92c5de", "#f7f7f7", "#f4a582", "#ca0020"))(length(breaksList)), breaks = breaksList,annotation_row = sign, angle_col = 0)
 pheatmap(plot, cluster_rows=T, show_rownames=F, border_color = NA, scale = "row", cluster_cols=F, color = colorRampPalette(c("#0571b0", "#92c5de", "#f7f7f7", "#f4a582", "#ca0020"))(length(breaksList)), breaks = breaksList,annotation_row = sign, angle_col = 0)
 pheatmap(plot[,colnames(plot)%in%c(levels[c(1:3,10,11,20)],"GFP")], cluster_rows=T, show_rownames=T, border_color = NA, scale = "row", cluster_cols=F, color = colorRampPalette(c("#0571b0", "#92c5de", "#f7f7f7", "#f4a582", "#ca0020"))(length(breaksList)), breaks = breaksList,annotation_row = sign, angle_col = 0,fontsize_row = 1)
@@ -1052,14 +1041,13 @@ dev.off()
 Fig. 4D PCA 
 ```{r}
 fig="S3A"
-mtx=read.table("Paper_FP/Data/P63_Mutants_validation_final_merged_rawCountsWithAnnotations.txt",header=T,sep="\t",quote="",stringsAsFactors = F)
+mtx=read.table("Data/P63_Mutants_validation_final_merged_rawCountsWithAnnotations.txt",header=T,sep="\t",quote="",stringsAsFactors = F)
 mtx=mtx[,!grepl("WTfirst",colnames(mtx))]
 
 pjsamples=data.frame(unique_samples=colnames(mtx)[-c(1:2)], condition=ifelse(stringr::str_count(colnames(mtx)[-c(1:2)],"_")>1,sapply(strsplit(colnames(mtx)[-c(1,2)],"_"),"[[", 2),sapply(strsplit(colnames(mtx)[-c(1,2)],"_"),"[[", 1)))
 
 pjsamples$condition=ifelse(grepl("WT",pjsamples$condition),"WT",pjsamples$condition)
 pjsamples$condition=ifelse(grepl("GFP",pjsamples$condition),"GFP",pjsamples$condition)
-
 
 # PCA with Neutrals and no WT2
 pjsamp_red=pjsamples[pjsamples$condition%in%c("WT","G293H","G310Q","T527I","H556A") & !grepl("WTsecond", pjsamples$unique_samples),]
@@ -1095,16 +1083,16 @@ p2=ggplot(ex, aes(x=ex[,2], y=ex[,3], fill=condition)) + geom_point(color="black
     xlab(paste0("PC1: ", round(attr(ex, "percentVar")[1] *100), "% variance"))+
     ylab(paste0("PC2: ", round(attr(ex, "percentVar")[2] *100), "% variance"))
 
-pdf(paste0("Paper_FP/SuppFigure3/",fig,"_Neut_noWT2.pdf"), height =6,width = 14)
+pdf(paste0("SuppFigure3/",fig,"_Neut_noWT2.pdf"), height =6,width = 14)
 grid.arrange(p1,p2,ncol=2,nrow=1, widths=c(1,1.1))
 dev.off()
 ```
 
-Fig. S4B PCA Lof-Neutral
+Fig. S4B PCA LoF-Neutral
 ```{r}
 fig="S3A"
 
-mtx=read.table("Paper_FP/Data/P63_Mutants_validation_final_merged_rawCountsWithAnnotations.txt",header=T,sep="\t",quote="",stringsAsFactors = F)
+mtx=read.table("Data/P63_Mutants_validation_final_merged_rawCountsWithAnnotations.txt",header=T,sep="\t",quote="",stringsAsFactors = F)
 mtx=mtx[,!grepl("WTfirst",colnames(mtx))]
 
 pjsamples=data.frame(unique_samples=colnames(mtx)[-c(1:2)], condition=ifelse(stringr::str_count(colnames(mtx)[-c(1:2)],"_")>1,sapply(strsplit(colnames(mtx)[-c(1,2)],"_"),"[[", 2),sapply(strsplit(colnames(mtx)[-c(1,2)],"_"),"[[", 1)))
@@ -1143,18 +1131,18 @@ p2=ggplot(ex, aes(x=ex[,2], y=ex[,3], fill=condition)) + geom_point(color="black
     xlab(paste0("PC1: ", round(attr(ex, "percentVar")[1] *100), "% variance"))+
     ylab(paste0("PC2: ", round(attr(ex, "percentVar")[2] *100), "% variance"))
 
-pdf(paste0("Paper_FP/SuppFigure3/",fig,".pdf"), height =6,width = 14)
+pdf(paste0("SuppFigure3/",fig,".pdf"), height =6,width = 14)
 grid.arrange(p1,p2,ncol=2,nrow=1, widths=c(1,1.1))
 dev.off()
 
 ```
 
-Fig. S4C GO
+Fig. S4C GO ontology enrichment
 ```{r}
 
 fig="S3A"
-res=read.table("Paper_FP/Results/WTvsGFP_results_annotated.txt",sep="\t",header=T)
-sign=readRDS("Paper_FP/Results/cluster_UP_DN_genes_GFPvsWT.rds")
+res=read.table("Results/WTvsGFP_results_annotated.txt",sep="\t",header=T)
+sign=readRDS("Results/cluster_UP_DN_genes_GFPvsWT.rds")
 
 plot=list()
 list_genes=list(UP_c1=res[res$ensembl_gene_id%in%rownames(sign[sign$c=="c1",,drop=F]),2],DOWN_c2=res[res$ensembl_gene_id%in%rownames(sign[sign$c=="c2",,drop=F]),2], DOWN_c3=res[res$ensembl_gene_id%in%rownames(sign[sign$c=="c3",,drop=F]),2])
@@ -1200,14 +1188,14 @@ plot[[genes]]=ggplot(data, aes(x = -log10(p.adj), y = Path, fill=overlap)) +
   geom_text(aes(label=Path, x=0.2), hjust=0)
 }
 
- pdf(paste0("Paper_FP/SuppFigure3/",fig, "_GO_2.pdf"), height=4, width=8)
+ pdf(paste0("SuppFigure3/",fig, "_GO_2.pdf"), height=4, width=8)
   for(p in 1:length(plot)){
  print(plot[[p]])
   }
   dev.off()
 ```
 
-#Fig. 5B featurePlot per Gene
+Fig. 5B featurePlot converted SCRAM-seq
 ```{r}
 mite_red=readRDS("scRNA-seq_SMART/mite_seurat_sign_reduction.rds")
 
@@ -1215,7 +1203,7 @@ FeaturePlot(mite_red, features = c("TP63","KRT14","KRT5","ANPEP","SNAI2","ITGB4"
 ggsave("scRNA-seq_SMART/Feature_plots_genes_sign_red.pdf", height=10, width=10)
 ```
 
-#Fig. 5Ea and 5Eb UMAP divided LoF-neutral
+#Fig. 5Ea and 5Eb UMAP converted SCRAM-seq LoF-neutral
 ```{r}
 dbd_mut=readRDS("scRNA-seq_SMART/DBD_final/DBD_BC_mut_assignment_with_effect.rds")
 sam_mut=readRDS("scRNA-seq_SMART/SAM_final/SAM_BC_mut_assignment_with_effect.rds")
@@ -1299,17 +1287,17 @@ ggsave("scRNA-seq_SMART/5F_UMAP_all_mut_divided_Neutral.pdf", height=6, width=16
 
 ```
 
-#Fig. 5F SCRAM mean score
+Fig. 5F converted SCRAM-seq mean score
 ```{r}
 domain="SAM" #or DBD
 
-sam_scores=readRDS("Paper_FP/Results/SAM_final_score.rds")
+sam_scores=readRDS("Results/SAM_final_score.rds")
 sam_scores=sam_scores[rownames(sam_scores)!="WT",,drop=F]
 rownames(sam_scores)=paste0(substr(rownames(sam_scores),1,1),as.numeric(substr(rownames(sam_scores),2,4))+43,substr(rownames(sam_scores),5,5))
 sam_mut=readRDS("scRNA-seq_SMART/SAM_final/SAM_BC_mut_assignment_with_effect.rds")
 fin_sam=merge(sam_mut[sam_mut$mut_name!="NA",], sam_scores, by.x="mut_name", by.y=0, all.x=T)
 
-dbd_scores=readRDS("Paper_FP/Results/DBD_final_score.rds")
+dbd_scores=readRDS("Results/DBD_final_score.rds")
 dbd_scores=dbd_scores[rownames(dbd_scores)!="WT",,drop=F]
 rownames(dbd_scores)=paste0(substr(rownames(dbd_scores),1,1),as.numeric(substr(rownames(dbd_scores),2,4))+43,substr(rownames(dbd_scores),5,5))
 dbd_mut=readRDS("scRNA-seq_SMART/DBD_final/DBD_BC_mut_assignment_with_effect.rds")
@@ -1319,13 +1307,10 @@ fin=rbind(fin_dbd, fin_sam)
 
 df_dbd=fin %>%
   filter(str_starts(BC, "DBD_")) 
-
 df_dbd= df_dbd %>%
   filter(!is.na(Output)) %>%
   group_by(mut_name,Output) %>%
   summarise(final_score=mean(final_score, na.rm=TRUE), .groups = "drop") 
-
-
 df_dbd$residues=substr(df_dbd$mut_name, 1, 4)
 df_dbd$aa=substr(df_dbd$mut_name, 5, 5)
 df_dbd$order=substr(df_dbd$residues, 2,4)
@@ -1351,14 +1336,14 @@ df_sam$order=substr(df_sam$residues, 2,4)
 df_sam=df_sam[order(df_sam$order, decreasing=T),]
 colnames(df_sam)[1]="score"
 df_sam$residues=factor(df_sam$residues, levels = rev(unique(df_sam$residues)))
-sort=sort=read.table("Paper_FP/Results/order_aa_heatmaps.txt", header = T)
+sort=sort=read.table("Results/order_aa_heatmaps.txt", header = T)
 sort=as.character(sort$aa)
 df_sam$aa=factor(df_sam$aa, levels = rev(sort))
 sub=df_sam
 
 sub=sub[order(sub$order, decreasing=T),]
 sub$residues=as.character(sub$residues)
-sort=sort=read.table("Paper_FP/Results/order_aa_heatmaps.txt", header = T)
+sort=sort=read.table("Results/order_aa_heatmaps.txt", header = T)
 sort=as.character(sort$aa)
 sub$aa=factor(sub$aa, levels = rev(sort))
 sub$residues=factor(sub$residues, levels = unique(sub$residues))
@@ -1368,10 +1353,9 @@ plot <- data.frame(
   residues = names(tapply(sub$final_score, sub$residues, mean, na.rm = TRUE)),
   mean_score = as.numeric(tapply(sub$final_score, sub$residues, mean, na.rm = TRUE)))
 
-
 plot$residues=factor(plot$residues, levels = rev(unique(plot$residues)))
 
-pdf(paste0("nuove_immagini_RDS/SCRAM_mean_score","_",domain,".pdf"), height =4,width = 16)
+pdf(paste0("figures/SCRAM_mean_score","_",domain,".pdf"), height =4,width = 16)
 ggplot(plot, aes(residues, "Mean")) + theme_void()+
   geom_tile(aes(fill = mean_score),size=1, color = "white") +
   scale_fill_gradientn(colors=colorRampPalette(c("red2", 'red', 'white', "darkblue", "darkblue"))(100),limits = c(-1.75, 1.75), na.value = "grey50") +
@@ -1387,12 +1371,12 @@ ggplot(plot, aes(residues, "Mean")) + theme_void()+
 dev.off()
 ```
 
-#Fig. 5D density umap
+Fig. 5D density UMAP converted SCRAM-seq 
 ```{r}
 mite_red=readRDS("scRNA-seq_SMART/mite_seurat_sign_reduction.rds")
 coord=merge(mite_red@meta.data, mite_red@reductions$umap@cell.embeddings, by=0)
 
-wt=read.table("Paper_FP/Results/WTvsGFP_results_annotated.txt",sep="\t",header=T)
+wt=read.table("Results/WTvsGFP_results_annotated.txt",sep="\t",header=T)
 wt=wt[wt$diffEXP_WTvsGFP=="UP",]
 wt=wt[order(wt$logFC_WTvsGFP,decreasing = T),]
 
@@ -1435,17 +1419,12 @@ p2=ggplot() +
   ) +
   theme_bw() 
   
-pdf("merged_MGI_Novaseq/sum_counts/seurat5project/figures/density_umap_covertedscram_high.pdf", height = 8, width = 12)
+pdf("figures/density_umap_covertedscram_high.pdf", height = 8, width = 12)
 p1+p2
 dev.off()
 ```
 
-#Fig. S5B
-```{r}
-
-```
-
-#Fig. S5B Correlation Spearman
+Fig. S5B Correlation Spearman SCRAM-seq converted vs all predictors
 ```{r}
 #scram vs all predictors
 old_mite=readRDS("scRNA-seq_SMART/concordant_mut_SCRAM_MITE_metadata.rds")
@@ -1495,17 +1474,68 @@ ggplot(data = melted_corr, aes(Var1, Var2, fill = value)) +
   labs(title = "Correlation Heatmap") +
   geom_text(aes(label = round(value, 2)), color = "black", size = 4)
 
-ggsave("merged_MGI_Novaseq/sum_counts/seurat5project/figures/Correlation_spearman_SCRAMc_DBD_MITE_allpredictors_avg_new.pdf", height=8, width=12)
-ggsave("merged_MGI_Novaseq/sum_counts/seurat5project/figures/Correlation_spearman_SCRAMc_SAM_MITE_allpredictors_avg_new.pdf", height=8, width=12)
+ggsave("figures/Correlation_spearman_SCRAMc_DBD_MITE_allpredictors_avg_new.pdf", height=8, width=12)
+ggsave("figures/Correlation_spearman_SCRAMc_SAM_MITE_allpredictors_avg_new.pdf", height=8, width=12)
 ```
 
-#Fig. S5C heatmap SCRAM converted SAM and DBD
+Fig. S5C heatmap SCRAM converted SAM and DBD
 ```{r}
+domain="SAM" #or DBD
 
+sam_scores=readRDS("Paper_FP/Results/SAM_final_score.rds")
+sam_scores=sam_scores[rownames(sam_scores)!="WT",,drop=F]
+rownames(sam_scores)=paste0(substr(rownames(sam_scores),1,1),as.numeric(substr(rownames(sam_scores),2,4))+43,substr(rownames(sam_scores),5,5))
+sam_mut=readRDS("scRNA-seq_SMART/SAM_final/SAM_BC_mut_assignment_with_effect.rds")
+fin_sam=merge(sam_mut[sam_mut$mut_name!="NA",], sam_scores, by.x="mut_name", by.y=0, all.x=T)
+
+dbd_scores=readRDS("Project_MITEseq/Paper/Results/DBD_final_score.rds")
+dbd_scores=dbd_scores[rownames(dbd_scores)!="WT",,drop=F]
+rownames(dbd_scores)=paste0(substr(rownames(dbd_scores),1,1),as.numeric(substr(rownames(dbd_scores),2,4))+43,substr(rownames(dbd_scores),5,5))
+dbd_mut=readRDS("Project_MITEseq/scRNA-seq_SMART/DBD_final/DBD_BC_mut_assignment_with_effect.rds")
+fin_dbd=merge(dbd_mut[dbd_mut$mut_name!="NA",], dbd_scores, by.x="mut_name", by.y=0, all.x=T)
+
+fin=rbind(fin_dbd, fin_sam)
+
+df_sam=fin %>%
+  filter(str_starts(BC, "SAM_"))
+
+df_sam= df_sam %>%
+  filter(!is.na(Output)) %>%
+  group_by(mut_name,Output) %>%
+  summarise(final_score=mean(final_score, na.rm=TRUE), .groups = "drop") 
+
+df_sam$residues=substr(df_sam$mut_name, 1, 4)
+df_sam$aa=substr(df_sam$mut_name, 5, 5)
+df_sam$order=substr(df_sam$residues, 2,4)
+df_sam=df_sam[order(df_sam$order, decreasing=T),]
+colnames(df_sam)[1]="score"
+df_sam$residues=factor(df_sam$residues, levels = rev(unique(df_sam$residues)))
+sort=sort=read.table("Results//order_aa_heatmaps.txt", header = T)
+sort=as.character(sort$aa)
+df_sam$aa=factor(df_sam$aa, levels = rev(sort))
+
+z <- as.data.frame(complete(df_sam, residues, aa))
+
+pdf(paste0("figures/Heatmap_scores_SCRAM_",domain,".pdf"), height =4,width = 16)
+ggplot(z, aes(aa, residues)) + theme_void()+
+  geom_tile(aes(fill = final_score),size=1, color = "white") +
+  scale_fill_gradientn(colors=colorRampPalette(rev(c("darkblue", 'blue', 'white', "red", "red2")))(100)
+                       , values=rescale(c(min(z$final_score[!is.na(z$final_score)]),0,max(z$final_score[!is.na(z$final_score)]))), na.value = "grey50") +
+  ylab("") +
+  xlab("") +
+  theme(
+    axis.text.x = element_text(size=15,family="Courier",angle = 90, vjust = 0.5, hjust=1),
+    axis.text.y = element_text(size=15,family="Courier"),
+    legend.title = element_blank(),
+    legend.key.size = unit(.5,"cm"),
+    legend.justification = c("right", "bottom"),
+    legend.text = element_text(size=15,family="Courier")) +
+  coord_flip()
+dev.off()
 ```
 
 
-#Fig. S5D and S5G confusions plot 
+Fig. S5D and S5G confusions plot 
 ```{r}
 file_path <- "Predictors_benchmark_RDS/Output MITE and predictors.xlsx"
 sam <- read_excel(file_path, sheet = 2)
@@ -1528,7 +1558,7 @@ clean_df$output_old_scram=ifelse(clean_df$TP63_sign1>=0,"Neutral","LoF")
 clean_df$output_mite=ifelse(clean_df$output_mite=="PAV","LoF","Neutral")
 
 predictors=c("MITE","mutpred", "provean", "sift", "polyphen", "alpha", "cadd", "ESM1B", "eve")
-output_dir="merged_MGI_Novaseq/sum_counts/seurat5project/temp/"
+output_dir="temp/"
 
 
 df <- data.frame(
@@ -1581,12 +1611,11 @@ for (pred in predictors) {
   cat("✅ Salvato:", filename, "\n")
 }
 
-file_path <- "../Predictors_benchmark_RDS/Output MITE and predictors.xlsx"  
+file_path <- "Predictors_benchmark_RDS/Output MITE and predictors.xlsx"  
 dbd <- read_excel(file_path, sheet = 1)
 dbd$mut_name=dbd$Variant  
 
-
-old_mite=readRDS("../scRNA-seq_SMART/concordant_mut_SCRAM_MITE_metadata.rds")
+old_mite=readRDS("scRNA-seq_SMART/concordant_mut_SCRAM_MITE_metadata.rds")
 old_mite=old_mite[old_mite$orig.ident=="DBD",]
 b_clean <- old_mite[!is.na(old_mite$mut_name) & old_mite$mut_name != "", ]
 
@@ -1602,18 +1631,13 @@ clean_df <- scram_and_mite %>% dplyr::select(mut_name, MITE, TP63_sign1,output_m
 clean_df$output_old_scram=ifelse(clean_df$TP63_sign1>=0,"Neutral","LoF")
 clean_df$output_mite=ifelse(clean_df$output_mite=="PAV","LoF","Neutral")
 
-
 df <- data.frame(
   Variant = clean_df$mut_name,
   MITE = clean_df$output_mite,
   SCRAM_c = clean_df$output_old_scram)
 
-
 df=df[!is.na(df$MITE),]
-
-#prendiamo le mutazioni univoche 
 df=df %>% distinct(Variant, .keep_all = TRUE)
-
   conf_tab <- df %>% 
     dplyr::count(SCRAM_c,MITE, name = "n")
 
@@ -1642,13 +1666,11 @@ df=df %>% distinct(Variant, .keep_all = TRUE)
   filename <- paste0(output_dir, "confusionplot_DBDconversionSCRAMvs_", "MITE", ".pdf")
   ggsave(filename, plot = p, height = 5, width = 8)
   
-#confusion plot per il DBD vs tutti i predittori
-
-file_path <- "../Predictors_benchmark_RDS/Output MITE and predictors.xlsx"  
+file_path <- "Predictors_benchmark_RDS/Output MITE and predictors.xlsx"  
 dbd <- read_excel(file_path, sheet = 1)
 dbd$mut_name=dbd$Variant  
 
-old_mite=readRDS("../scRNA-seq_SMART/concordant_mut_SCRAM_MITE_metadata.rds")
+old_mite=readRDS("scRNA-seq_SMART/concordant_mut_SCRAM_MITE_metadata.rds")
 old_mite=old_mite[old_mite$orig.ident=="DBD",]
 b_clean <- old_mite[!is.na(old_mite$mut_name) & old_mite$mut_name != "", ]
 
@@ -1657,7 +1679,6 @@ scram_and_mite<- b_clean %>%
     dbd %>% dplyr::select(mut_name, MITE,mutpred,provean,sift,polyphen,papi,alpha,cadd, ESM1b,EVE,Output),
     by = "mut_name"
   )
-
 scram_and_mite$output_mite=scram_and_mite$Output.y
 
 clean_df <- scram_and_mite %>%
@@ -1667,7 +1688,7 @@ clean_df$output_old_scram=ifelse(clean_df$TP63_sign1>=0,"Neutral","LoF")
 clean_df$output_mite=ifelse(clean_df$output_mite=="PAV","LoF","Neutral")
 
 predictors=c("mutpred", "provean", "sift", "polyphen", "alpha", "cadd", "ESM1B", "eve")
-output_dir="merged_MGI_Novaseq/sum_counts/seurat5project/figures/"
+output_dir="figures/"
 
 df <- data.frame(
   Variant = clean_df$mut_name,
@@ -1723,17 +1744,17 @@ for (pred in predictors) {
 ```
 
 
-#Fig.S5C heatmap SCRAM convertito SAM and DBD
+Fig.S5C heatmap SCRAM convertito SAM and DBD
 ```{r}
 domain="DBD" #SAM
 
-sam_scores=readRDS("Paper_FP/Results/SAM_final_score.rds")
+sam_scores=readRDS("Results/SAM_final_score.rds")
 sam_scores=sam_scores[rownames(sam_scores)!="WT",,drop=F]
 rownames(sam_scores)=paste0(substr(rownames(sam_scores),1,1),as.numeric(substr(rownames(sam_scores),2,4))+43,substr(rownames(sam_scores),5,5))
 sam_mut=readRDS("scRNA-seq_SMART/SAM_final/SAM_BC_mut_assignment_with_effect.rds")
 fin_sam=merge(sam_mut[sam_mut$mut_name!="NA",], sam_scores, by.x="mut_name", by.y=0, all.x=T)
 
-dbd_scores=readRDS("Paper_FP/Results/DBD_final_score.rds")
+dbd_scores=readRDS("Results/DBD_final_score.rds")
 dbd_scores=dbd_scores[rownames(dbd_scores)!="WT",,drop=F]
 rownames(dbd_scores)=paste0(substr(rownames(dbd_scores),1,1),as.numeric(substr(rownames(dbd_scores),2,4))+43,substr(rownames(dbd_scores),5,5))
 dbd_mut=readRDS("scRNA-seq_SMART/DBD_final/DBD_BC_mut_assignment_with_effect.rds")
@@ -1748,20 +1769,19 @@ df_dbd= df_dbd %>%
   group_by(mut_name,Output) %>%
   summarise(final_score=mean(final_score, na.rm=TRUE), .groups = "drop") 
 
-
 df_dbd$residues=substr(df_dbd$mut_name, 1, 4)
 df_dbd$aa=substr(df_dbd$mut_name, 5, 5)
 df_dbd$order=substr(df_dbd$residues, 2,4)
 df_dbd=df_dbd[order(df_dbd$order, decreasing=T),]
 colnames(df_dbd)[1]="score"
 df_dbd$residues=factor(df_dbd$residues, levels = rev(unique(df_dbd$residues)))
-sort=sort=read.table("Paper_FP/Results//order_aa_heatmaps.txt", header = T)
+sort=sort=read.table("/Results/order_aa_heatmaps.txt", header = T)
 sort=as.character(sort$aa)
 df_dbd$aa=factor(df_dbd$aa, levels = rev(sort))
 
 z <- as.data.frame(complete(df_dbd, residues, aa))
 
-pdf(paste0("nuove_immagini_RDS/Heatmap_scores_SCRAM_",domain,".pdf"), height =4,width = 16)
+pdf(paste0("figures/Heatmap_scores_SCRAM_",domain,".pdf"), height =4,width = 16)
 ggplot(z, aes(aa, residues)) + theme_void()+
   geom_tile(aes(fill = final_score),size=1, color = "white") +
   scale_fill_gradientn(colors=colorRampPalette(rev(c("darkblue", 'blue', 'white', "red", "red2")))(100)
@@ -1779,14 +1799,13 @@ ggplot(z, aes(aa, residues)) + theme_void()+
 dev.off()
 ```
 
-#Fig. S5F ROC curve
+Fig. S5F ROC CURVE MITE SCRAM-seq converted and SCRAM-seq converted vs all predictors
 ```{r}
-old_mite=readRDS("../scRNA-seq_SMART/concordant_mut_SCRAM_MITE_metadata.rds")
+old_mite=readRDS("scRNA-seq_SMART/concordant_mut_SCRAM_MITE_metadata.rds")
 old_mite=old_mite[old_mite$orig.ident=="SAM",]
 b_clean <- old_mite[!is.na(old_mite$mut_name) & old_mite$mut_name != "", ]
 
 scram_allpre_mite=rbind(dbd_allpre_mite,sam_allpre_mite)
-
 scram_allpre_mite$output_old_scram=ifelse(scram_allpre_mite$mean_TP63_sign>=0,"Neutral","LoF")
 
 df_summary=scram_allpre_mite
@@ -1807,7 +1826,6 @@ roc_list <- list(
 "SCRAM_c" <- roc(df_pred$mite_label, -df_pred$mean_TP63_sign,  direction = "<"))
 
 names(roc_list) <- c("MITE", "SCRAM_c")
-
 auc_values <- sapply(roc_list, auc)
 names(roc_list) <- paste0(names(roc_list), " (AUC=", sprintf("%.2f", auc_values), ")")
 
@@ -1823,21 +1841,21 @@ ggroc(roc_list, legacy.axes = TRUE) +
   ) +
   theme(legend.position = "right")
 
-ggsave("merged_MGI_Novaseq/sum_counts/seurat5project/ROC_MITE_cSCRAM_SAM&DBD_avg.pdf", height=5, width=8)
+ggsave("figures/ROC_MITE_cSCRAM_SAM&DBD_avg.pdf", height=5, width=8)
 
-old_mite=readRDS("../scRNA-seq_SMART/concordant_mut_SCRAM_MITE_metadata.rds")
+old_mite=readRDS("scRNA-seq_SMART/concordant_mut_SCRAM_MITE_metadata.rds")
 old_mite=old_mite[old_mite$orig.ident=="DBD",]
 b_clean <- old_mite[!is.na(old_mite$mut_name) & old_mite$mut_name != "", ]
 
 df_summary <- b_clean %>%
-  group_by(mut_name) %>%  # raggruppa per mutazione e tipo (LoF / Neutral)
+  group_by(mut_name) %>% 
   summarise(
     mean_TP63_sign = mean(TP63_sign1, na.rm = TRUE),
-    occurrence = n(),             # conta quante cellule hanno quella mutazione
+    occurrence = n(),            
     .groups = "drop"
   )
 
-file_path <- "../Predictors_benchmark_RDS/Output MITE and predictors.xlsx"  
+file_path <- "Predictors_benchmark_RDS/Output MITE and predictors.xlsx"  
 dbd <- read_excel(file_path, sheet = 1)
 dbd$mut_name=dbd$Variant  
 
@@ -1849,23 +1867,21 @@ dbd_allpre_mite<- dbd %>%
 dbd_allpre_mite$mutant_P53=NULL
 dbd_allpre_mite$P53_DMS_score=NULL
 
-
 #SAM SCRAM_c
 
-old_mite=readRDS("../scRNA-seq_SMART/concordant_mut_SCRAM_MITE_metadata.rds")
+old_mite=readRDS("scRNA-seq_SMART/concordant_mut_SCRAM_MITE_metadata.rds")
 old_mite=old_mite[old_mite$orig.ident=="SAM",]
 b_clean <- old_mite[!is.na(old_mite$mut_name) & old_mite$mut_name != "", ]
 
-
 df_summary <- b_clean %>%
-  group_by(mut_name) %>%  # raggruppa per mutazione e tipo (LoF / Neutral)
+  group_by(mut_name) %>%  #
   summarise(
     mean_TP63_sign = mean(TP63_sign1, na.rm = TRUE),
-    occurrence = n(),             # conta quante cellule hanno quella mutazione
+    occurrence = n(),             
     .groups = "drop"
   )
 
-file_path <- "../Predictors_benchmark_RDS/Output MITE and predictors.xlsx"  
+file_path <- "Predictors_benchmark_RDS/Output MITE and predictors.xlsx"  
 sam <- read_excel(file_path, sheet = 2)
 sam$mut_name=sam$Variant  
 
@@ -1874,7 +1890,6 @@ sam_allpre_mite<- sam %>%
     df_summary %>% dplyr::select(mut_name, mean_TP63_sign),
     by = "mut_name"
   )
-
 
 scram_allpre_mite=rbind(dbd_allpre_mite,sam_allpre_mite)
 
@@ -1886,7 +1901,6 @@ df_pred <- scram_allpre_mite %>%
   )
 
 # === Calcolo ROC per ciascun predittore ===
-
 
 roc_scram <- roc(df_pred$scram_label, -df_pred$mean_TP63_sign,  direction = "<")
 roc_mutpred <- roc(df_pred$scram_label, df_pred$mutpred, direction = "<")
@@ -1949,7 +1963,6 @@ names(roc_list) <- c(
 auc_values <- sapply(roc_list, auc)
 names(roc_list) <- paste0(names(roc_list), " (AUC=", sprintf("%.2f", auc_values), ")")
 
-# Plot con AUC in legenda
 ggroc(roc_list, legacy.axes = TRUE) +
   geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "gray60") +
   theme_minimal(base_size = 14) +
@@ -1961,11 +1974,11 @@ ggroc(roc_list, legacy.axes = TRUE) +
   ) +
   theme(legend.position = "right")
 
-ggsave("merged_MGI_Novaseq/sum_counts/seurat5project/figures/ROC_SCRAMc_DBD_SAM_allpredictors_avg.pdf", height=5, width=8)
+ggsave("figures/ROC_SCRAMc_DBD_SAM_allpredictors_avg.pdf", height=5, width=8)
 ```
 
 
-#FIG. 6A and 6B UMAP SCRAM non converted
+Fig. 6A and 6B UMAP SCRAM SAM non converted
 ```{r}
 b_clean=read.table("merged_MGI_Novaseq/sum_counts/seurat5project/data/mutations_sam_to_conversion.txt", header = T)
 
@@ -1987,11 +2000,10 @@ int_mut=unlist(strsplit("G293H - G310Q - R304Q - R279Q - R304T - R279S - R311I -
 points=b_new[b_new$mut_name_new%in%int_mut,]
 
 
-
 ggplot(coord, aes(x=umap_1, y=umap_2))+
 geom_point(size=.5, color="grey90") + theme_bw()+theme(panel.grid = element_blank(), axis.text = element_blank(), axis.title = element_blank(), axis.ticks = element_blank(), legend.position = "none") + xlab("UMAP1") + ylab("UMAP2") +  geom_point(data=points, aes(fill=conversion), size=5, pch=21) + geom_text(data=points, aes(label=mut_name_new),vjust=0, hjust=0) + 
   scale_fill_brewer(palette = "Dark2")
-ggsave("merged_MGI_Novaseq/sum_counts/seurat5project/P63_UMAP_validated_mutants.pdf", height=5, width=8)
+ggsave("figures/P63_UMAP_validated_mutants.pdf", height=5, width=8)
 
 
 scram_red=readRDS("merged_MGI_Novaseq/sum_counts/seurat5project/data/scram_tp63_nocc_red_pca")
@@ -2008,18 +2020,18 @@ print(ggplot(data = dataframe, aes_string(x = "umap_1", y = "umap_2",color="clus
         title = element_text(size=24)) +
   xlab("UMAP1") + 
   ylab("UMAP2"))
-ggsave("merged_MGI_Novaseq/sum_counts/seurat5project/MYOD_UMAP_clusters_res02.pdf", height=5, width=8)
+ggsave("figures/MYOD_UMAP_clusters_res02.pdf", height=5, width=8)
 
 ```
 
-#Fig. S6C c
+Fig. S6C Heatmap score SCRAM SAM non converted
 ```{r}
 domain="SAM"
 
 b_clean=read.table("merged_MGI_Novaseq/sum_counts/seurat5project/data/mutations_p63_to_conversion.txt", header = T)
 
 #score MITE with all variants
-sam_scores=readRDS("../Paper_FP/Results/SAM_final_score.rds")
+sam_scores=readRDS("Results/SAM_final_score.rds")
 sam_scores=sam_scores[rownames(sam_scores)!="WT",,drop=F]
 rownames(sam_scores)=paste0(substr(rownames(sam_scores),1,1),as.numeric(substr(rownames(sam_scores),2,4))+43,substr(rownames(sam_scores),5,5))
 sam_scores$mut_name=rownames(sam_scores)
@@ -2038,7 +2050,6 @@ new_mite <- new_mite %>%
     mut_name_new = paste0(prefix, position, suffix)
   )
 
-
 new_mite$prefix=NULL
 new_mite$position=NULL
 new_mite$suffix=NULL
@@ -2046,7 +2057,6 @@ new_mite=new_mite %>% mutate(mut_name=mut_name_new)
 
 
 fin_sam<- sam_scores %>%
-  #dplyr::select(mut_name, Cluster1, Cluster2, Cluster3, output_scram) %>%
   inner_join(
     new_mite %>% dplyr::select(mut_name,BC,Sign_test_11),
     by = "mut_name"
@@ -2062,14 +2072,14 @@ df_sam$order=substr(df_sam$residues, 2,4)
 df_sam=df_sam[order(df_sam$order, decreasing=T),]
 colnames(df_sam)[1]="score"
 df_sam$residues=factor(df_sam$residues, levels = rev(unique(df_sam$residues)))
-sort=sort=read.table("../Paper_FP/Results//order_aa_heatmaps.txt", header = T)
+sort=sort=read.table("Results/order_aa_heatmaps.txt", header = T)
 sort=as.character(sort$aa)
 df_sam$aa=factor(df_sam$aa, levels = rev(sort))
 
 z <- as.data.frame(complete(df_sam, residues, aa))
 
 
-cairo_pdf(paste0("merged_MGI_Novaseq/sum_counts/seurat5project/figures/Heatmap_scores_SCRAM_nc_",domain,"newSign.pdf"), height =4,width = 16)
+cairo_pdf(paste0("figures/Heatmap_scores_SCRAM_nc_",domain,"newSign.pdf"), height =4,width = 16)
 
 ggplot(z, aes(aa, residues)) + theme_void()+
   geom_tile(aes(fill = Sign_test_11),size=1, color = "white") +
@@ -2090,13 +2100,12 @@ dev.off()
 
 ```
 
-#Fig. 6A UMAP feature plot
+Fig. 6A UMAP SCRAM SAM non converted feature plot
 ```{r}
 scram_sam=readRDS("merged_MGI_Novaseq/sum_counts/seurat5project/data/FLE_sam_obj_FC")
 
 df <- FetchData(scram_sam, vars = c("umap_1", "umap_2", "Sign_test_11"))
 
-# Dividi le cellule in due gruppi in base al punteggio
 df$group <- ifelse(df$Sign_test_11 >= 0, "High TP63Sign", "Low TP63Sign")
 FeaturePlot(scram_sam,features = c("TP63","ITGB4","ITGA6","IDI2","KRT14","KRT5","KRT17","FAT2"))
 
@@ -2107,7 +2116,7 @@ dataset <- as.data.frame(Embeddings(scram_sam, reduction = "umap"))
 
 # Create a ggplot from the feature data
 merged=cbind(feature_data,dataset)
-pdf("merged_MGI_Novaseq/sum_counts/seurat5project/figures/TP63_SAM_FeaturePlots_GeneExpression.pdf", width = 12, height = 6)
+pdf("figures/TP63_SAM_FeaturePlots_GeneExpression.pdf", width = 12, height = 6)
 for(i in gene){
 gene_col_name <- paste0(i)
 
@@ -2131,71 +2140,15 @@ dev.off()
 
 ```
 
-#Fig. 6B UMAP density umap
+Fig. 6B UMAP SCRAM SAM non converted density umap
 ```{r}
 scram_sam=readRDS("merged_MGI_Novaseq/sum_counts/seurat5project/data/FLE_sam_obj_FC")
 
 df <- FetchData(scram_myod, vars = c("umap_1", "umap_2", "Sign_test_11"))
 
-# Dividi le cellule in due gruppi in base al punteggio
 df$group <- ifelse(df$Sign_test_11 >= 0, "High TP63Sign", "Low TP63Sign")
 
- # p1 <- ggplot(df %>% filter(group == "Low Cluster3"),
- #              aes(x = umap_1, y = umap_2)) +
- #   stat_density_2d_filled(contour = TRUE, geom = "polygon") +
- #   scale_fill_viridis_d(option = "inferno") +
- #   coord_equal() +
- #   theme_bw() +
- #   labs(title = "Low Cluster3 cell density", fill = "KDE")
- # 
-# p2 <- ggplot(df %>% filter(group == "High Cluster3"),
-#              aes(x = umap_1, y = umap_2)) +
-#   stat_density_2d_filled(contour = TRUE, geom = "polygon") +
-#   scale_fill_viridis_d(option = "inferno") +
-#   coord_equal() +
-#   theme_bw() +
-#   labs(title = "High Cluster3 cell density", fill = "KDE")
 
-
-# p1a <- ggplot(df %>% filter(group == "Low Cluster3"),
-#              aes(x = umap_1, y = umap_2)) +
-#   stat_density_2d_filled(contour = TRUE, geom = "polygon", color = "black") +
-#   scale_fill_viridis_d(option = "inferno", name = "KDE") +
-#   coord_equal() +
-#   labs(title = "Low Cluster3 cell density") +
-#   theme(
-#     panel.background = element_rect(fill = "white", color = NA),
-#     plot.background = element_rect(fill = "white", color = NA),
-#     panel.grid = element_blank(),
-#     axis.text = element_text(color = "black"),
-#     axis.title = element_text(color = "black"),
-#     plot.title = element_text(face = "bold", hjust = 0.5)
-#   )
-# p1 <- ggplot() +
-#   geom_point(data = df, aes(umap_1, umap_2), color = "grey90", size = 0.3) +
-#   stat_density_2d(data = df %>% filter(group == "Low MYOD1Sign"),
-#                   aes(x = umap_1, y = umap_2, fill = after_stat(level)),
-#                   geom = "polygon", color = "black",contour_var = "ndensity", n=200,  expand = 1.2) +
-#   scale_fill_viridis_c(option = "inferno", name = "Density") +
-#   coord_cartesian(xlim=c(min(df$umap_1)-1,max(df$umap_1)+1),
-#                   ylim=c(min(df$umap_2)-1,max(df$umap_2)+1), expand=TRUE) +
-#   theme_bw() +
-#   labs(title = "Low MYOD1Sign") +  coord_equal()
-# p1
-# 
-# p2 <- ggplot() +
-#   geom_point(data = df, aes(umap_1, umap_2), color = "grey90", size = 0.3) +
-#   stat_density_2d(data = df %>% filter(group == "High MYOD1Sign"),
-#                   aes(x = umap_1, y = umap_2, fill = after_stat(level)),
-#                   geom = "polygon", color = "black") +
-#   scale_fill_viridis_c(option = "inferno", name = "Density") +
-#   theme_bw() +
-#   labs(title = "High MYOD1Sign") +
-#   coord_equal()
-# 
-# pdf("merged_MGI_Novaseq/sum_counts/seurat5project/figures/density_umap_myod1", height = 8, width = 12)
-# p1+p2
-# dev.off()
 p=ggplot() +
   geom_point(data = df, aes(umap_1, umap_2), color = "grey90", size = 0.3) +
   stat_density_2d_filled(
@@ -2223,17 +2176,16 @@ p2=ggplot() +
   ) +
   theme_bw() 
   
-pdf("merged_MGI_Novaseq/sum_counts/seurat5project/figures/density_umap_tp63_2.pdf", height = 8, width = 12)
+pdf("figures/density_umap_tp63_2.pdf", height = 8, width = 12)
 p2
 dev.off()
 ```
 
-Fig 6C
+Fig 6C UMAP SCRAM SAM non converted neutral and LoF mutations pinpointed
 ```{r}
 b_clean=read.table("merged_MGI_Novaseq/sum_counts/seurat5project/data/mutations_sam_to_conversion.txt", header = T)
 new_mite=b_clean
 
-#considering SCRAM
 points_df=new_mite[!(is.na(new_mite$mut_name)),]
 points_df$output_scram=ifelse(points_df$Sign_test_11>= 0, "Neutral mutation","LoF mutation")
 points_lof_scram=points_df[points_df$output_scram %in%"LoF mutation",]
@@ -2242,19 +2194,16 @@ points_neutral_scram=points_df[points_df$output_scram%in%"Neutral mutation",]
 
 ggplot(coord, aes(x=umap_1, y=umap_2))+
 geom_point(size=.5, color="grey90") + theme_bw()+theme(panel.grid = element_blank(), axis.text = element_blank(), axis.title = element_blank(), axis.ticks = element_blank(), legend.position = "none") + xlab("UMAP1") + ylab("UMAP2") +  geom_point(data=points_lof_scram,fill="tomato",size=5, pch=21) +  ggtitle("P63 LoF based on SCRAM")
-ggsave("merged_MGI_Novaseq/sum_counts/seurat5project/figures/TP63_UMAP_lof_mutants_SCRAM.pdf", height=5, width=8)
+ggsave("figures/TP63_UMAP_lof_mutants_SCRAM.pdf", height=5, width=8)
 
 ggplot(coord, aes(x=umap_1, y=umap_2))+
 geom_point(size=.5, color="grey90") + theme_bw()+theme(panel.grid = element_blank(), axis.text = element_blank(), axis.title = element_blank(), axis.ticks = element_blank(), legend.position = "none") + xlab("UMAP1") + ylab("UMAP2") +  geom_point(data=points_neutral_scram,fill="forestgreen", size=5, pch=21) +  ggtitle("P63 neutral based on SCRAM")
-ggsave("merged_MGI_Novaseq/sum_counts/seurat5project/figures/TP63_UMAP_neutral_mutants_SCRAM.pdf", height=5, width=8)
+ggsave("figures/TP63_UMAP_neutral_mutants_SCRAM.pdf", height=5, width=8)
 
 
 points_df=write.csv(points_df,"merged_MGI_Novaseq/sum_counts/seurat5project/data/sam_list_variants_neutral_lof.csv")
 
-
 points_df=new_mite[!(is.na(new_mite$mut_name)),]
-
-
 feature_data <- as.data.frame(t(cbind(scram_sam[["RNA"]]$data.1.1[gene, ],scram_sam[["RNA"]]$data.2.2[gene, ])))
 metadata=scram_sam@meta.data
 coord=merge(sam_scram@meta.data, sam_scram@reductions$umap@cell.embeddings, by=0)
@@ -2275,19 +2224,19 @@ points_neutral_itgb4=fin_coord[fin_coord$test_itgb4%in%"Neutral mutation",]
 
 ggplot(coord, aes(x=umap_1, y=umap_2))+
 geom_point(size=.5, color="grey90") + theme_bw()+theme(panel.grid = element_blank(), axis.text = element_blank(), axis.title = element_blank(), axis.ticks = element_blank(), legend.position = "none") + xlab("UMAP1") + ylab("UMAP2") +  geom_point(data=points_lof_itgb4,fill="tomato",size=5, pch=21) +  ggtitle("P63 LoF based on ITGB4")
-ggsave("merged_MGI_Novaseq/sum_counts/seurat5project/figures/P63_UMAP_ITGB4_lof_mutants_SCRAM.pdf", height=5, width=8)
+ggsave("figures/P63_UMAP_ITGB4_lof_mutants_SCRAM.pdf", height=5, width=8)
 
 ggplot(coord, aes(x=umap_1, y=umap_2))+
 geom_point(size=.5, color="grey90") + theme_bw()+theme(panel.grid = element_blank(), axis.text = element_blank(), axis.title = element_blank(), axis.ticks = element_blank(), legend.position = "none") + xlab("UMAP1") + ylab("UMAP2") +  geom_point(data=points_neutral_itgb4,fill="forestgreen", size=5, pch=21) +  ggtitle("P63 neutral based on ITGB4")
-ggsave("merged_MGI_Novaseq/sum_counts/seurat5project/figures/P63_UMAP_ITGB4_neutral_mutants_SCRAM.pdf", height=5, width=8)
+ggsave("figures/P63_UMAP_ITGB4_neutral_mutants_SCRAM.pdf", height=5, width=8)
 
 ```
 
-Fig 6D c mean score SCRAM convertito
+Fig 6D  mean score SCRAM SAM non converted
 ```{r}
 domain="SAM"
 
-sam_scores=readRDS("../Paper_FP/Results/SAM_final_score.rds")
+sam_scores=readRDS("Results/SAM_final_score.rds")
 sam_scores=sam_scores[rownames(sam_scores)!="WT",,drop=F]
 rownames(sam_scores)=paste0(substr(rownames(sam_scores),1,1),as.numeric(substr(rownames(sam_scores),2,4))+43,substr(rownames(sam_scores),5,5))
 sam_scores$mut_name=rownames(sam_scores)
@@ -2297,14 +2246,12 @@ new_mite <- new_mite %>%
   extract(
     col   = mut_name,
     into  = c("prefix","position","suffix"),
-    regex = "^([A-Za-z])(\\d{3})([A-Za-z])$"
-  )
+    regex = "^([A-Za-z])(\\d{3})([A-Za-z])$")
 
 new_mite <- new_mite %>%
   mutate(
     position      = as.integer(position) + 43,
-    mut_name_new = paste0(prefix, position, suffix)
-  )
+    mut_name_new = paste0(prefix, position, suffix))
 
 
 new_mite$prefix=NULL
@@ -2312,13 +2259,10 @@ new_mite$position=NULL
 new_mite$suffix=NULL
 new_mite=new_mite %>% mutate(mut_name=mut_name_new)
 
-
 fin_sam<- sam_scores %>%
-  #dplyr::select(mut_name, Cluster1, Cluster2, Cluster3, output_scram) %>%
   inner_join(
     new_mite %>% dplyr::select(mut_name,BC,Sign_test_11),
-    by = "mut_name"
-  )
+    by = "mut_name")
 
 df_sam= fin_sam %>%
   group_by(mut_name,Sign_test_11) %>%
@@ -2341,9 +2285,7 @@ sub$residues=as.character(sub$residues)
 sort=sort=read.table("../Paper_FP/Results//order_aa_heatmaps.txt", header = T)
 sort=as.character(sort$aa)
 sub$aa=factor(sub$aa, levels = rev(sort))
-
 sub$residues=factor(sub$residues, levels = unique(sub$residues))
-
 
 plot <- data.frame(
   residues = names(tapply(sub$Sign_test_11, sub$residues, mean, na.rm = TRUE)),
@@ -2352,7 +2294,7 @@ plot <- data.frame(
 
 plot$residues=factor(plot$residues, levels = rev(unique(plot$residues)))
 
-pdf(paste0("merged_MGI_Novaseq/sum_counts/seurat5project/figures/SCRAM_mean_newscore","_",domain,".pdf"), height =4,width = 16)
+pdf(paste0("figures/SCRAM_mean_newscore","_",domain,".pdf"), height =4,width = 16)
 ggplot(plot, aes(residues, "Mean")) + theme_void()+
   geom_tile(aes(fill = mean_score),size=1, color = "white") +
   scale_fill_gradientn(colors=colorRampPalette(c("red2", 'red', 'white', "darkblue", "darkblue"))(100),limits = c(-1.75, 2.50), na.value = "grey50") +
@@ -2368,25 +2310,22 @@ ggplot(plot, aes(residues, "Mean")) + theme_void()+
 dev.off()
 ```
 
-Fig 6E and 6H Roc curves
+Fig 6E and 6H Roc curves SCRAM SAM non converted
 ```{r}
 
 common_df=read.csv("merged_MGI_Novaseq/sum_counts/seurat5project/data/SAMcomparison_old_new_scram.csv")
 
-
 df_summary <- common_df %>%
-  group_by(mut_name, Output) %>%  # raggruppa per mutazione e tipo (LoF / Neutral)
+  group_by(mut_name, Output) %>%  # Neutral)
   summarise(
     mean_TP63 = mean(TP63_sign1, na.rm = TRUE),
     mean_Sign = mean(Sign_test_11, na.rm = TRUE),
-    occurrence = n(),             # conta quante cellule hanno quella mutazione
+    occurrence = n(),             
     .groups = "drop"
   )
 
 df_summary$output_mite=df_summary$Output
-
 df_summary$output_old_scram=ifelse(df_summary$mean_TP63>=0,"Neutral","LoF")
-
 df_summary$output_new_scram=ifelse(df_summary$mean_Sign>=0,"Neutral","LoF")
 
 
@@ -2395,8 +2334,7 @@ scram_c_nc_mite <- df_summary %>% dplyr::select(mean_Sign,mut_name,mean_TP63,out
 
 df_pred <- scram_c_nc_mite %>%
   mutate(
-    mite_label = ifelse(output_mite == "LoF mutation", 1, 0),
-  )
+    mite_label = ifelse(output_mite == "LoF mutation", 1, 0),)
 
 roc_list <- list(
  "MITE"  <- roc(df_pred$mite_label, df_pred$mite_label,      direction = "<"),
@@ -2422,11 +2360,10 @@ ggroc(roc_list, legacy.axes = TRUE) +
   ) +
   theme(legend.position = "right")
 
-#ggsave("merged_MGI_Novaseq/sum_counts/seurat5project/ROC_MITE_newSCRAM_oldSCRAM_avg.pdf", height=5, width=8)
-ggsave("merged_MGI_Novaseq/sum_counts/seurat5project/figures/ROC_MITE_ncSCRAM_cSCRAM_avg.pdf", height=5, width=8)
+
+ggsave("figures/ROC_MITE_ncSCRAM_cSCRAM_avg.pdf", height=5, width=8)
 
 b_clean=read.table("merged_MGI_Novaseq/sum_counts/seurat5project/data/mutations_p63_to_conversion.txt", header = T)
-
 
 b_temp <- b_clean %>%
   extract(
@@ -2449,20 +2386,19 @@ b_temp$mut_name=b_temp$mut_name_new
 common_df=b_temp
 
 df_summary <- common_df %>%
-  group_by(mut_name) %>%  # raggruppa per mutazione e tipo (LoF / Neutral)
+  group_by(mut_name) %>%  
   summarise(
     mean_Sign = mean(Sign_test_11, na.rm = TRUE),
-    occurrence = n(),             # conta quante cellule hanno quella mutazione
+    occurrence = n(),             
     .groups = "drop"
   )
 
-file_path <- "../Predictors_benchmark_RDS/Output MITE and predictors.xlsx"  
+file_path <- "Predictors_benchmark_RDS/Output MITE and predictors.xlsx"  
 
 sam <- read_excel(file_path, sheet = 2)
 sam$mut_name=sam$Variant
 
 scram_allpre_mite<- sam %>%
-  #dplyr::select(mut_name, Cluster1, Cluster2, Cluster3, output_scram) %>%
   inner_join(
     df_summary %>% dplyr::select(mut_name, mean_Sign),
     by = "mut_name"
@@ -2474,8 +2410,6 @@ df_pred <- scram_allpre_mite %>%
   mutate(
     scram_label = ifelse(output_new_scram =="LoF", 1, 0)
   )
-
-# === Calcolo ROC per ciascun predittore ===
 
 
 roc_scram <- roc(df_pred$scram_label, -df_pred$mean_Sign,  direction = "<")
@@ -2489,7 +2423,6 @@ roc_cadd    <- roc(df_pred$scram_label, df_pred$cadd,    direction = "<")
 roc_esm1b   <- roc(df_pred$scram_label, df_pred$ESM1b,   direction = ">")
 roc_eve     <- roc(df_pred$scram_label, df_pred$EVE,     direction = "<")
 
-# === Confronto visivo ROC ===
 
 sapply(list(
   SCRAM=roc_scram, MutPred=roc_mutpred, Provean=roc_provean,
@@ -2527,7 +2460,6 @@ roc_list <- list(
 "PROVEAN" <- roc(df_pred$scram_label, df_pred$provean, direction = ">"),
 "SIFT"    <- roc(df_pred$scram_label, df_pred$sift,    direction = ">"),
 "POLYPHEN"<- roc(df_pred$scram_label, df_pred$polyphen,direction = "<"),
-#"PAPI"    <- roc(df_pred$scram_label, as.numeric(df_pred$papi),    direction = "<"),
 "ALPHA"   <- roc(df_pred$scram_label, df_pred$alpha,   direction = "<"),
 "CADD"    <- roc(df_pred$scram_label, df_pred$cadd,    direction = "<"),
 "ESM1B"   <- roc(df_pred$scram_label, df_pred$ESM1b,   direction = ">"),
@@ -2553,10 +2485,10 @@ ggroc(roc_list, legacy.axes = TRUE) +
   ) +
   theme(legend.position = "right")
 
-ggsave("merged_MGI_Novaseq/sum_counts/seurat5project/figures/ROC_SCRAMnc_allpredictors_avg_newsign.pdf", height=5, width=8)
+ggsave("figures/ROC_SCRAMnc_allpredictors_avg_newsign.pdf", height=5, width=8)
 ```
 
-Fig 6I and 6J vilin plot
+Fig 6I and 6J violin plot Neutral and LoF variants SCRAM SAM non converted
 ```{r}
 b_clean=read.table("merged_MGI_Novaseq/sum_counts/seurat5project/data/mutations_p63_to_conversion.txt", header = T)
 
@@ -2567,7 +2499,7 @@ df <- b_clean %>%
   drop_na(BC, mut_name, Sign_test_11, output_scram)
 
 cell_counts <- df %>%
-  group_by(mut_name, output_scram) %>%   # conteggio per variante e classe
+  group_by(mut_name, output_scram) %>%   
   summarise(occurrence = n(), .groups = "drop") %>%
   arrange(desc(occurrence))
 
@@ -2591,16 +2523,14 @@ df_subset$mut_name <- factor(df_subset$mut_name,
                               levels = selected_variants)
 
 
-
 #adding statistical test Mann-Whitney on all the variants
 
 df$score=df$Sign_test_11
 test_stat_all <- wilcox.test(score ~ output_scram, data = df)
 my_comparisons <- list(c("Neutral", "LoF"))
 
-#contiamo anche quante varianti per gruppo in modo da aggiungerlo 
 variant_counts <- b_clean %>%
-  distinct(mut_name, output_scram) %>% # Considera solo le varianti uniche
+  distinct(mut_name, output_scram) %>% 
   group_by(output_scram) %>%
   summarise(N_variants = n())
 
@@ -2621,23 +2551,21 @@ ggplot(df, aes(x = output_scram, y = Sign_test_11, fill = output_scram)) +
   ) +
   scale_fill_manual(values = c("Neutral" = "#4daf4a", "LoF" = "#e41a1c")) +
   scale_x_discrete(labels = x_labels)+
-  # add statistical test
   stat_compare_means(
     comparisons = my_comparisons,
     method = "wilcox.test", 
-    label = "p.signif",      # Mostra con asterischi (*, **, ***)
-    hide.ns = TRUE,          # Nasconde i non significativi (ns)
-    vjust = 0.5,             # Allinea verticalmente la barra
-    label.y.npc = "top"      # Posiziona l'annotazione in alto
+    label = "p.signif",  
+    hide.ns = TRUE,      
+    vjust = 0.5,            
+    label.y.npc = "top"   
   ) +
   theme(
     axis.text.x = element_text(angle = 0), 
     legend.position = "top"
   )
-ggsave("merged_MGI_Novaseq/sum_counts/seurat5project/figures/violin_plot_significance_all_variants_newsignature_SAM.pdf", width = 9, height = 6)
+ggsave("figures/violin_plot_significance_all_variants_newsignature_SAM.pdf", width = 9, height = 6)
 
 
-#proviamo a rappresentare tutte le cellule del dataset in base a quelle che esprimono o non esprimono la signature
 
 df <- b_clean %>%
   dplyr::select(BC, mut_name, Sign_test_11) %>%
@@ -2645,30 +2573,26 @@ df <- b_clean %>%
   mutate(
     Expression_Status = ifelse(Sign_test_11 >= 0, "Neutral", "LoF"))
 
-# 2. Calcolo dei conteggi per le label
 cell_summary <- df %>%
   group_by(Expression_Status) %>%
   summarise(n_cells = n(), .groups = "drop")
 
-# Creiamo le label per l'asse X che includano il numero totale di cellule
 x_labels <- setNames(
   paste0(cell_summary$Expression_Status, "\n(n = ", cell_summary$n_cells, " cells)"),
   cell_summary$Expression_Status
 )
 my_comparisons <- list(c("Neutral", "LoF"))
 
-
-# 3. Plot della distribuzione globale
 ggplot(df, aes(x = Expression_Status, y = Sign_test_11, fill = Expression_Status)) +
   geom_violin(trim = FALSE, scale = "width") +
   geom_boxplot(width = 0.1, outlier.shape = NA, color = "black") +
   stat_compare_means(
     comparisons = my_comparisons,
     method = "wilcox.test",
-    label = "p.format",      # Mostra asterischi
+    label = "p.format",    
     hide.ns = TRUE,
-    vjust = 0.5,           # Posizione orizzontale
-    label.y.npc = "top" , # Posizione verticale (sopra il valore massimo)
+    vjust = 0.5,           
+    label.y.npc = "top" ,
     size = 5,
     fontface = "bold"
   ) +
@@ -2687,16 +2611,13 @@ ggplot(df, aes(x = Expression_Status, y = Sign_test_11, fill = Expression_Status
     legend.position = "top"
   ) 
 
+ggsave("figures/violin_SAMnc_global_cell_distribution_signature.pdf", width = 8, height = 7)
 
-# Salvataggio
-ggsave("merged_MGI_Novaseq/sum_counts/seurat5project/figures/violin_SAMnc_global_cell_distribution_signature.pdf", width = 8, height = 7)
 
-#statistical test only on the 5 selected variants
 df_subset$score=df_subset$Sign_test_11
 test_stat=wilcox.test(score ~ output_scram, data = df_subset)
 
-p_value <- test_stat$p.value # Estrai il p-value
-
+p_value <- test_stat$p.value 
 p_value_label <- ""
 
 if (p_value <= 0.0001) {
@@ -2708,9 +2629,8 @@ if (p_value <= 0.0001) {
 } else if (p_value <= 0.05) {
     p_value_label <- "*"
 } else {
-    p_value_label <- "ns" # Non significativo
+    p_value_label <- "ns" 
 }
-
 
 
  ggplot(df_subset, aes(x = mut_name, y = Sign_test_11 , fill = output_scram)) +
@@ -2753,21 +2673,20 @@ annotate(
   ) +
   scale_y_continuous(expand = expansion(mult = c(0.05, 0.1)))
 
-ggsave("merged_MGI_Novaseq/sum_counts/seurat5project/figures/violin_plot_significance_top5_variants_newsignature_SAM.pdf", width = 9, height = 6)
+ggsave("figures/violin_plot_significance_top5_variants_newsignature_SAM.pdf", width = 9, height = 6)
 ```
 
-Fig 7A myod featureplots
+Fig 7A SCRAM MYOD1 featureplots
 ```{r}
 scram_myod=readRDS("merged_MGI_Novaseq/sum_counts/seurat5project/data/scram_myod_nocc_red_pca")
 FeaturePlot(scram_myod,features =c("CHRNA1","DYSF","TNNT2","TTN","SGCA","MUSK","ACTC1","TRIM72","TPM1","ITGA7","TNNT1","ENO3"))
 
-
 feature_data <- as.data.frame(t(cbind(scram_myod[["RNA"]]$data.1.1[gene2, ],scram_myod[["RNA"]]$data.2.2[gene2, ])))
 dataset <- as.data.frame(Embeddings(scram_myod, reduction = "umap"))
 
-# Create a ggplot from the feature data
+
 merged=cbind(feature_data,dataset)
-pdf("merged_MGI_Novaseq/sum_counts/seurat5project/figures/MYOD1_FeaturePlots_GeneExpression.pdf", width = 12, height = 6)
+pdf("figures/MYOD1_FeaturePlots_GeneExpression.pdf", width = 12, height = 6)
 for(i in gene2){
 gene_col_name <- paste0(i)
 
@@ -2790,75 +2709,44 @@ print(ggplot(data = merged, aes(x = umap_1, y = umap_2, color = .data[[gene_col_
 dev.off()
 ```
 
-Fig 7B myod density
+Fig 7B SCRAM MYOD1 density UMAP
 ```{r}
 scram_myod=readRDS("merged_MGI_Novaseq/sum_counts/seurat5project/data/FLE_myod1_obj_FC")
 scram_sam=readRDS("merged_MGI_Novaseq/sum_counts/seurat5project/data/FLE_sam_obj_FC")
 
 df <- FetchData(scram_myod, vars = c("umap_1", "umap_2", "Sign_test_11"))
 
-# Dividi le cellule in due gruppi in base al punteggio
 df$group <- ifelse(df$Sign_test_11 >= 0, "High TP63Sign", "Low TP63Sign")
 
- # p1 <- ggplot(df %>% filter(group == "Low Cluster3"),
- #              aes(x = umap_1, y = umap_2)) +
- #   stat_density_2d_filled(contour = TRUE, geom = "polygon") +
- #   scale_fill_viridis_d(option = "inferno") +
- #   coord_equal() +
- #   theme_bw() +
- #   labs(title = "Low Cluster3 cell density", fill = "KDE")
- # 
-# p2 <- ggplot(df %>% filter(group == "High Cluster3"),
-#              aes(x = umap_1, y = umap_2)) +
-#   stat_density_2d_filled(contour = TRUE, geom = "polygon") +
-#   scale_fill_viridis_d(option = "inferno") +
-#   coord_equal() +
-#   theme_bw() +
-#   labs(title = "High Cluster3 cell density", fill = "KDE")
 
-
-# p1a <- ggplot(df %>% filter(group == "Low Cluster3"),
-#              aes(x = umap_1, y = umap_2)) +
-#   stat_density_2d_filled(contour = TRUE, geom = "polygon", color = "black") +
-#   scale_fill_viridis_d(option = "inferno", name = "KDE") +
-#   coord_equal() +
-#   labs(title = "Low Cluster3 cell density") +
-#   theme(
-#     panel.background = element_rect(fill = "white", color = NA),
-#     plot.background = element_rect(fill = "white", color = NA),
-#     panel.grid = element_blank(),
-#     axis.text = element_text(color = "black"),
-#     axis.title = element_text(color = "black"),
-#     plot.title = element_text(face = "bold", hjust = 0.5)
-#   )
-# p1 <- ggplot() +
-#   geom_point(data = df, aes(umap_1, umap_2), color = "grey90", size = 0.3) +
-#   stat_density_2d(data = df %>% filter(group == "Low MYOD1Sign"),
-#                   aes(x = umap_1, y = umap_2, fill = after_stat(level)),
-#                   geom = "polygon", color = "black",contour_var = "ndensity", n=200,  expand = 1.2) +
-#   scale_fill_viridis_c(option = "inferno", name = "Density") +
-#   coord_cartesian(xlim=c(min(df$umap_1)-1,max(df$umap_1)+1),
-#                   ylim=c(min(df$umap_2)-1,max(df$umap_2)+1), expand=TRUE) +
-#   theme_bw() +
-#   labs(title = "Low MYOD1Sign") +  coord_equal()
-# p1
-# 
-# p2 <- ggplot() +
-#   geom_point(data = df, aes(umap_1, umap_2), color = "grey90", size = 0.3) +
-#   stat_density_2d(data = df %>% filter(group == "High MYOD1Sign"),
-#                   aes(x = umap_1, y = umap_2, fill = after_stat(level)),
-#                   geom = "polygon", color = "black") +
-#   scale_fill_viridis_c(option = "inferno", name = "Density") +
-#   theme_bw() +
-#   labs(title = "High MYOD1Sign") +
-#   coord_equal()
-# 
-# pdf("merged_MGI_Novaseq/sum_counts/seurat5project/figures/density_umap_myod1", height = 8, width = 12)
- # p1+p2
-# dev.off()
+ p1 <- ggplot() +
+   geom_point(data = df, aes(umap_1, umap_2), color = "grey90", size = 0.3) +
+   stat_density_2d(data = df %>% filter(group == "Low MYOD1Sign"),
+                   aes(x = umap_1, y = umap_2, fill = after_stat(level)),
+                   geom = "polygon", color = "black",contour_var = "ndensity", n=200,  expand = 1.2) +
+   scale_fill_viridis_c(option = "inferno", name = "Density") +
+   coord_cartesian(xlim=c(min(df$umap_1)-1,max(df$umap_1)+1),
+                   ylim=c(min(df$umap_2)-1,max(df$umap_2)+1), expand=TRUE) +
+   theme_bw() +
+   labs(title = "Low MYOD1Sign") +  coord_equal()
+ p1
+ 
+ p2 <- ggplot() +
+   geom_point(data = df, aes(umap_1, umap_2), color = "grey90", size = 0.3) +
+   stat_density_2d(data = df %>% filter(group == "High MYOD1Sign"),
+                   aes(x = umap_1, y = umap_2, fill = after_stat(level)),
+                   geom = "polygon", color = "black") +
+   scale_fill_viridis_c(option = "inferno", name = "Density") +
+   theme_bw() +
+   labs(title = "High MYOD1Sign") +
+   coord_equal()
+ 
+ pdf("figures/density_umap_myod1", height = 8, width = 12)
+  p1+p2
+ dev.off()
 ```
 
-Fig. 7C UMAP neutral LoF
+Fig. 7C SCRAM MYOD1 UMAP neutral LoF mutations
 ```{r}
 
 b=read.table("merged_MGI_Novaseq/sum_counts/seurat5project/data/myod_variants_score_uncleaned_new.txt",sep = "\t")
@@ -2870,7 +2758,6 @@ b_temp$id=NULL
 
 new_mite=b_temp
 
-#considering SCRAM
 points_df=new_mite[!(is.na(new_mite$mut_name)),]
 points_df$output_scram=ifelse(points_df$Sign_test_11>= 0, "Neutral mutation","LoF mutation")
 points_lof_scram=points_df[points_df$output_scram %in%"LoF mutation",]
@@ -2878,40 +2765,33 @@ points_neutral_scram=points_df[points_df$output_scram%in%"Neutral mutation",]
 
 coord=read.csv("merged_MGI_Novaseq/sum_counts/seurat5project/data/scram_red_myod_coord.csv")
 
-
 ggplot(coord, aes(x=umap_1, y=umap_2))+
 geom_point(size=.5, color="grey90") + theme_bw()+theme(panel.grid = element_blank(), axis.text = element_blank(), axis.title = element_blank(), axis.ticks = element_blank(), legend.position = "none") + xlab("UMAP1") + ylab("UMAP2") +  geom_point(data=points_lof_scram,fill="tomato",size=5, pch=21) +  ggtitle("MYOD1 LoF based on SCRAM")
-ggsave("merged_MGI_Novaseq/sum_counts/seurat5project/Figures/MYOD1_UMAP_lof_mutants_SCRAM.pdf", height=5, width=8)
+ggsave("figures/MYOD1_UMAP_lof_mutants_SCRAM.pdf", height=5, width=8)
 
 ggplot(coord, aes(x=umap_1, y=umap_2))+
 geom_point(size=.5, color="grey90") + theme_bw()+theme(panel.grid = element_blank(), axis.text = element_blank(), axis.title = element_blank(), axis.ticks = element_blank(), legend.position = "none") + xlab("UMAP1") + ylab("UMAP2") +  geom_point(data=points_neutral_scram,fill="forestgreen", size=5, pch=21) +  ggtitle("MYOD1 neutral based on SCRAM")
-ggsave("merged_MGI_Novaseq/sum_counts/seurat5project/figures/MYOD1_UMAP_neutral_mutants_SCRAM.pdf", height=5, width=8)
-
-#variantis LoF + neutral
+ggsave("figures/MYOD1_UMAP_neutral_mutants_SCRAM.pdf", height=5, width=8)
 
 point_all_variants=rbind(points_lof_scram,points_neutral_scram)
 
 ggplot(coord, aes(x=umap_1, y=umap_2))+
 geom_point(size=.5, color="grey90") + theme_bw()+theme(panel.grid = element_blank(), axis.text = element_blank(), axis.title = element_blank(), axis.ticks = element_blank(), legend.position = "none") + xlab("UMAP1") + ylab("UMAP2") +  geom_point(data=point_all_variants,aes(fill=output_scram),size=5, pch=21) +  ggtitle("P63 LoF based on SCRAM")
-ggsave("merged_MGI_Novaseq/sum_counts/seurat5project/figures//MYOD1_UMAP_all_mutants_SCRAM.pdf", height=5, width=8)
+ggsave("fffigures/MYOD1_UMAP_all_mutants_SCRAM.pdf", height=5, width=8)
 ```
 
-Fig. 7D
+Fig. 7D heatmap scor SCRAM MYOD1
 ```{r}
-#heatmap score SCRAM MYOD1
 
 domain="MYOD1"
-#genotyping SCRAM no conversion
 b_clean=read.table("merged_MGI_Novaseq/sum_counts/seurat5project/data/mutations_myod_to_conversion.txt", header = T)
 
 new_mite=b_clean
 fin_myod<- new_mite %>% dplyr::select(mut_name,BC,Sign_test_11)
 
-
 df_myod= fin_myod %>%
   group_by(mut_name,Sign_test_11) %>%
   summarise(Sign_test_11=mean(Sign_test_11, na.rm=TRUE), .groups = "drop") 
-
 
 df_myod$residues=str_match(df_myod$mut_name, "^([A-Z][0-9]+)")[,2]
 df_myod$aa=str_match(df_myod$mut_name, "([A-Z])$")[,2]
@@ -2928,15 +2808,13 @@ df_myod$aa=factor(df_myod$aa, levels = rev(sort))
 
 z <- as.data.frame(complete(df_myod, residues, aa))
 
-
-cairo_pdf(paste0("merged_MGI_Novaseq/sum_counts/seurat5project/figures/Heatmap_scores_SCRAM_nc_",domain,"newsign2_rescale.pdf"), height =4,width = 16)
+cairo_pdf(paste0("figures/Heatmap_scores_SCRAM_nc_",domain,"newsign2_rescale.pdf"), height =4,width = 16)
 
 ggplot(z, aes(aa, residues)) + theme_void()+
   geom_tile(aes(fill = Sign_test_11),size=1, color = "white") +
   scale_fill_gradientn(colors=colorRampPalette(rev(c("darkblue", 'blue', 'white', "red", "red2")))(100), limits=c(-1,1),
                        , 
 values=rescale(c(-1,0,1)), na.value = "grey50") +                       
-#values=rescale(c(min(z$Sign_test_11[!is.na(z$Sign_test_11)]),0,max(z$Sign_test_11[!is.na(z$Sign_test_11)]))), na.value = "grey50") +
   ylab("") +
   xlab("") +
   theme(
@@ -2950,24 +2828,22 @@ values=rescale(c(-1,0,1)), na.value = "grey50") +
 dev.off()
 ```
 
-Fig. 7E and 7F violin plot MYOD
+Fig. 7E and 7F violin plot MYOD1 LoF and neutral variants
 ```{r}
 points_df=read.csv("merged_MGI_Novaseq/sum_counts/seurat5project/data/myod_list_variants_neutral_lof.csv")
-
 
 df <- points_df %>%
   dplyr::select(BC, mut_name, Sign_test_11, output_scram) %>%
   drop_na(BC, mut_name, Sign_test_11, output_scram)
 
 cell_counts <- df %>%
-  group_by(mut_name, output_scram) %>%   # conteggio per variante e classe
+  group_by(mut_name, output_scram) %>%   
   summarise(occurrence = n(), .groups = "drop") %>%
   arrange(desc(occurrence))
 
-# Filtra solo le varianti che hanno una classificazione univoca
 unique_variants <- cell_counts %>%
   group_by(mut_name) %>%
-  filter(n_distinct(output_scram) == 1) %>%   # solo varianti con una sola classe
+  filter(n_distinct(output_scram) == 1) %>%   
   ungroup()
 
 top5_neutral <- unique_variants %>%
@@ -2991,31 +2867,26 @@ df_subset$mut_name <- factor(df_subset$mut_name,
 
 df_subset$output=ifelse(df_subset$output_scram=="Neutral mutation","Neutral","LoF")
 
-#conta in quante cellule compare una mutazione
 mutation_counts <- df_subset %>%
   group_by(mut_name) %>%
   summarise(
-    n_cells = n(),                                     # Conta le righe/cellule
-    mean_signature = mean(Sign_test_11, na.rm = TRUE), # Media dello score
-    status = unique(output)[1]                        # Mantiene la classificazione
+    n_cells = n(),                                     
+    mean_signature = mean(Sign_test_11, na.rm = TRUE), 
+    status = unique(output)[1]                       
   ) %>%
-  arrange(desc(n_cells))                               # Ordina dalla più frequente
+  arrange(desc(n_cells))                              
 
 
-###violin plot tutte le cellule
-###
 df <- points_df %>%
   dplyr::select(BC, mut_name, Sign_test_11) %>%
   drop_na() %>%
   mutate(
     Expression_Status = ifelse(Sign_test_11 >= 0, "Neutral", "LoF"))
 
-# 2. Calcolo dei conteggi per le label
 cell_summary <- df %>%
   group_by(Expression_Status) %>%
   summarise(n_cells = n(), .groups = "drop")
 
-# Creiamo le label per l'asse X che includano il numero totale di cellule
 x_labels <- setNames(
   paste0(cell_summary$Expression_Status, "\n(n = ", cell_summary$n_cells, " cells)"),
   cell_summary$Expression_Status
@@ -3051,26 +2922,25 @@ ggplot(df, aes(x = output_scram, y = Sign_test_11, fill = output_scram)) +
   ) +
   scale_fill_manual(values = c("Neutral mutation" = "#4daf4a", "LoF mutation" = "#e41a1c")) +
   scale_x_discrete(labels = x_labels)+
-  # add statistical test
   stat_compare_means(
     comparisons = my_comparisons,
     method = "wilcox.test", 
-    label = "p.signif",      # Mostra con asterischi (*, **, ***)
-    hide.ns = TRUE,          # Nasconde i non significativi (ns)
-    vjust = 0.5,             # Allinea verticalmente la barra
-    label.y.npc = "top"      # Posiziona l'annotazione in alto
+    label = "p.signif",     
+    hide.ns = TRUE,         
+    vjust = 0.5,          
+    label.y.npc = "top"  
   ) +
   theme(
     axis.text.x = element_text(angle = 0), 
     legend.position = "top"
   )
-ggsave("merged_MGI_Novaseq/sum_counts/seurat5project/figures/violin_plot_significance_all_variants_newsignature_MYOD1.pdf", width = 9, height = 6)
+ggsave("figures/violin_plot_significance_all_variants_newsignature_MYOD1.pdf", width = 9, height = 6)
 
 #statistical test only on the 5 selected variants
 df_subset$score=df_subset$Sign_test_11
 test_stat=wilcox.test(score ~ output_scram, data = df_subset)
 
-p_value <- test_stat$p.value # Estrai il p-value
+p_value <- test_stat$p.value 
 
 p_value_label <- ""
 
@@ -3083,7 +2953,7 @@ if (p_value <= 0.0001) {
 } else if (p_value <= 0.05) {
     p_value_label <- "*"
 } else {
-    p_value_label <- "ns" # Non significativo
+    p_value_label <- "ns"
 }
 
  ggplot(df_subset, aes(x = mut_name, y = Sign_test_11 , fill = output_scram)) +
@@ -3126,27 +2996,22 @@ annotate(
   ) +
   scale_y_continuous(expand = expansion(mult = c(0.05, 0.1)))
 
-ggsave("merged_MGI_Novaseq/sum_counts/seurat5project/figures/violin_plot_significance_top5_variants_newsignature_MYOD.pdf", width = 9, height = 6)
+ggsave("figures/violin_plot_significance_top5_variants_newsignature_MYOD.pdf", width = 9, height = 6)
 
 ```
 
 
-Fig. S7A MYOD1 
+Fig. S7A featureplot UMAP SCRAM MYOD1 
 ```{r}
-#heatmap score SCRAM MYOD1
-
 domain="MYOD1"
-#genotyping SCRAM no conversion
 b_clean=read.table("merged_MGI_Novaseq/sum_counts/seurat5project/data/mutations_myod_to_conversion.txt", header = T)
 
 new_mite=b_clean
 fin_myod<- new_mite %>% dplyr::select(mut_name,BC,Sign_test_11)
 
-
 df_myod= fin_myod %>%
   group_by(mut_name,Sign_test_11) %>%
   summarise(Sign_test_11=mean(Sign_test_11, na.rm=TRUE), .groups = "drop") 
-
 
 df_myod$residues=str_match(df_myod$mut_name, "^([A-Z][0-9]+)")[,2]
 df_myod$aa=str_match(df_myod$mut_name, "([A-Z])$")[,2]
@@ -3157,21 +3022,20 @@ df_myod=df_myod[order(df_myod$order, decreasing=T),]
 colnames(df_myod)[1]="score"
 df_myod$residues=factor(df_myod$residues, levels = rev(unique(df_myod$residues)))
 
-sort=sort=read.table("../Paper_FP/Results//order_aa_heatmaps.txt", header = T)
+sort=sort=read.table("Results/order_aa_heatmaps.txt", header = T)
 sort=as.character(sort$aa)
 df_myod$aa=factor(df_myod$aa, levels = rev(sort))
 
 z <- as.data.frame(complete(df_myod, residues, aa))
 
 
-cairo_pdf(paste0("merged_MGI_Novaseq/sum_counts/seurat5project/figures/Heatmap_scores_SCRAM_nc_",domain,"newsign2_rescale.pdf"), height =4,width = 16)
+cairo_pdf(paste0("figures/Heatmap_scores_SCRAM_nc_",domain,"newsign2_rescale.pdf"), height =4,width = 16)
 
 ggplot(z, aes(aa, residues)) + theme_void()+
   geom_tile(aes(fill = Sign_test_11),size=1, color = "white") +
   scale_fill_gradientn(colors=colorRampPalette(rev(c("darkblue", 'blue', 'white', "red", "red2")))(100), limits=c(-1,1),
                        , 
 values=rescale(c(-1,0,1)), na.value = "grey50") +                       
-#values=rescale(c(min(z$Sign_test_11[!is.na(z$Sign_test_11)]),0,max(z$Sign_test_11[!is.na(z$Sign_test_11)]))), na.value = "grey50") +
   ylab("") +
   xlab("") +
   theme(
@@ -3185,10 +3049,9 @@ values=rescale(c(-1,0,1)), na.value = "grey50") +
 dev.off()
 
 
-#benchmark SIFT e POLYPHEN per MYOD1
 
 
-pred=read.table("../Predictors_benchmark_RDS/output vep myod1.txt", header = T)
+pred=read.table("Predictors_benchmark_RDS/output vep myod1.txt", header = T)
 pred=pred[,c("Protein_position","Amino_acids","Codons","SIFT","PolyPhen")]
 
 
@@ -3208,7 +3071,7 @@ df$Polyphen=replace_na(df$PolyPhen_score, 0)
 
 input_myod=data.frame(mut_name=df$mut,sift=df$SIFT,polyphen=df$Polyphen)
 
-sort=read.table("../Paper_FP//Results/order_aa_heatmaps.txt",header=T)
+sort=read.table("Results/order_aa_heatmaps.txt",header=T)
 sort=as.character(sort$aa)
 
 rownames(input_myod)=input_myod$mut_name
@@ -3227,18 +3090,14 @@ mut_pred$residues=factor(mut_pred$residues, levels = (unique(mut_pred$residues))
 
 
 mut_pred$aa=factor(mut_pred$aa, levels = rev(sort))
-
-
 z <- as.data.frame(complete(mut_pred, residues, aa))
-
 
 #sift
 limit=0.05
 colors=colorRampPalette(c("red2", 'red2', 'white', "darkblue", "darkblue"))(100)
 
 
-
-cairo_pdf(paste0("merged_MGI_Novaseq/sum_counts/seurat5project/figures/Heatmap_scores_SIFT_",domain,".pdf"), height =4,width = 16)
+cairo_pdf(paste0("figures/Heatmap_scores_SIFT_",domain,".pdf"), height =4,width = 16)
      ggplot(z, aes(aa, residues)) +
       theme_void() +
       geom_tile(aes(fill = as.numeric(score)), size = 1, color = "white") +
@@ -3264,7 +3123,6 @@ dev.off()
 #Mean score sift MYOD1
 
 domain="MYOD1"
-
 plot <- data.frame(
   residues = names(tapply(mut_pred$score, mut_pred$residues, mean, na.rm = TRUE)),
   mean_score = as.numeric(tapply(mut_pred$score, mut_pred$residues, mean, na.rm = TRUE)))
@@ -3273,7 +3131,7 @@ plot <- data.frame(
 plot$residues=factor(plot$residues, levels = (unique(plot$residues)))
 
 
-pdf(paste0("merged_MGI_Novaseq/sum_counts/seurat5project/figures/sift_mean_score","_",domain,".pdf"), height =4,width = 16)
+pdf(paste0("figures/sift_mean_score","_",domain,".pdf"), height =4,width = 16)
   ggplot(plot, aes(residues, "sift")) + theme_void() +
   geom_tile(aes(fill = mean_score), size = 1, color = "white") +
   scale_fill_gradientn(
@@ -3308,8 +3166,6 @@ mut_pred$residues=factor(mut_pred$residues, levels = rev(unique(mut_pred$residue
 
 
 mut_pred$aa=factor(mut_pred$aa, levels = rev(sort))
-
-
 z <- as.data.frame(complete(mut_pred, residues, aa))
 
 
@@ -3351,7 +3207,7 @@ limit=0.5
 colors=colorRampPalette(rev(c("red2", 'red2', 'white', "darkblue", "darkblue")))(100)
 
 
-pdf(paste0("merged_MGI_Novaseq/sum_counts/seurat5project/figures/polyphen_mean_score","_",domain,".pdf"), height =4,width = 16)
+pdf(paste0("figures/polyphen_mean_score","_",domain,".pdf"), height =4,width = 16)
   ggplot(plot, aes(residues, "polyphen")) + theme_void() +
   geom_tile(aes(fill = mean_score), size = 1, color = "white") +
   scale_fill_gradientn(
@@ -3372,10 +3228,9 @@ pdf(paste0("merged_MGI_Novaseq/sum_counts/seurat5project/figures/polyphen_mean_s
   )
 dev.off()
 
-
 #esm1b
 
-esm1b=read.csv("../Predictors_benchmark_RDS/MYOD1_normalized.csv", header = T, sep=",")
+esm1b=read.csv("Predictors_benchmark_RDS/MYOD1_normalized.csv", header = T, sep=",")
 esm1b=esm1b[,-(3)]
 esm1b_filtered=esm1b %>%
   filter(pos >= 1 & pos <= 71)
@@ -3392,7 +3247,6 @@ esm1b_long=esm1b_filtered %>%
     wt_aa=wt_aa,
     mut_aa=mut_aa,
     residues=paste0(wt_aa,Protein_position),
-   # Amino_acids = paste0(wt_aa, "/", mut_aa), 
     score.esm1b = score_esm1b
   ) %>%
   filter(wt_aa != mut_aa) %>%
@@ -3410,7 +3264,7 @@ z <- as.data.frame(complete(esm1b_long, residues, mut_aa))
 limit=-7.5
 colors=colorRampPalette(rev(c("darkblue", "darkblue", 'white', "red2", 'red2')))(100)
 
-cairo_pdf(paste0("merged_MGI_Novaseq/sum_counts/seurat5project/figures/Heatmap_scores_ESM1b_",domain,".pdf"), height =4,width = 16)
+cairo_pdf(paste0("figures/Heatmap_scores_ESM1b_",domain,".pdf"), height =4,width = 16)
       ggplot(z, aes(mut_aa, residues)) +
       theme_void() +
       geom_tile(aes(fill = as.numeric(score.esm1b)), size = 1, color = "white") +
@@ -3442,8 +3296,7 @@ plot <- data.frame(
 plot$residues=factor(plot$residues, levels = (unique(plot$residues)))
 
 
-
-pdf(paste0("merged_MGI_Novaseq/sum_counts/seurat5project/figures/esm1b_mean_score","_",domain,".pdf"), height =4,width = 16)
+pdf(paste0("igures/esm1b_mean_score","_",domain,".pdf"), height =4,width = 16)
   ggplot(plot, aes(residues, "esm1b")) + theme_void() +
   geom_tile(aes(fill = mean_score), size = 1, color = "white") +
   scale_fill_gradientn(
